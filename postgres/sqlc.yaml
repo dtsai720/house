@@ -1,0 +1,7 @@
+version: 1
+packages:
+  - path: "sqlc"
+    name: "sqlc"
+    engine: "postgresql"
+    schema: "tables"
+    queries: "query.sql"
