@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/hourse"
 	"github.com/hourse/postgres/sqlc"
@@ -101,11 +102,12 @@ func (hr HourseRepository) Upsert(ctx context.Context, in hourse.UpsertHourseReq
 		Floor:     in.Floor,
 		Shape:     in.Shape,
 		Age:       in.Age,
-		Area:      in.Area,
-		MainArea:  sql.NullString{String: in.Mainarea, Valid: in.Mainarea != ""},
+		Area:      ToValue(in.Area),
+		MainArea:  sql.NullString{String: ToValue(in.Mainarea), Valid: in.Mainarea != ""},
 		Raw:       json.RawMessage(raw),
+		Others:    in.Others,
 	}); err != nil {
-		log.Printf("upsert hourse error: %v", err)
+		log.Printf("upsert hourse error: %v\n, data is %s", err, raw)
 		return err
 	} else if err = tx.Commit(); err != nil {
 		log.Printf("upsert commit error: %v", err)
@@ -113,4 +115,14 @@ func (hr HourseRepository) Upsert(ctx context.Context, in hourse.UpsertHourseReq
 	}
 
 	return nil
+}
+
+func ToValue(in string) string {
+	var sb strings.Builder
+	for _, char := range in {
+		if char == '.' || ('0' <= char && char <= '9') {
+			sb.WriteRune(char)
+		}
+	}
+	return sb.String()
 }

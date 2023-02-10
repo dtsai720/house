@@ -33,6 +33,7 @@ type Hourse struct {
 	Area        string
 	MainArea    sql.NullString
 	Raw         json.RawMessage
+	Others      []string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   sql.NullTime

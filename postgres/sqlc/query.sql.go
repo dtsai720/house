@@ -54,7 +54,7 @@ WHERE hourse.updated_at > CURRENT_TIMESTAMP - INTERVAL '7 day'
     AND (hourse.main_area > $8 :: DECIMAL OR COALESCE($8, '') = '')
 )
 SELECT
-    hourse.id, hourse.universal_id, hourse.section_id, hourse.link, hourse.layout, hourse.address, hourse.price, hourse.floor, hourse.shape, hourse.age, hourse.area, hourse.main_area, hourse.raw, hourse.created_at, hourse.updated_at, hourse.deleted_at,
+    hourse.id, hourse.universal_id, hourse.section_id, hourse.link, hourse.layout, hourse.address, hourse.price, hourse.floor, hourse.shape, hourse.age, hourse.area, hourse.main_area, hourse.raw, hourse.others, hourse.created_at, hourse.updated_at, hourse.deleted_at,
     CONCAT(city.name, section.name, hourse.address) :: VARCHAR AS location,
     city.name :: TEXT AS city,
     section.name :: TEXT AS section,
@@ -91,6 +91,7 @@ type GetHoursesRow struct {
 	Area        string
 	MainArea    sql.NullString
 	Raw         json.RawMessage
+	Others      []string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   sql.NullTime
@@ -132,6 +133,7 @@ func (q *Queries) GetHourses(ctx context.Context, arg GetHoursesParams) ([]GetHo
 			&i.Area,
 			&i.MainArea,
 			&i.Raw,
+			pq.Array(&i.Others),
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
@@ -181,8 +183,8 @@ func (q *Queries) InsertSection(ctx context.Context, arg InsertSectionParams) (i
 }
 
 const upsertHourse = `-- name: UpsertHourse :exec
-INSERT INTO hourse (section_id, link, layout, address, price, floor, shape, age, area, main_area, raw ,created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 ,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+INSERT INTO hourse (section_id, link, layout, address, price, floor, shape, age, area, main_area, raw, others ,created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 ,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (link) DO UPDATE SET price = $5, raw = $11, age = $8, updated_at = CURRENT_TIMESTAMP
 `
 
@@ -198,6 +200,7 @@ type UpsertHourseParams struct {
 	Area      string
 	MainArea  sql.NullString
 	Raw       json.RawMessage
+	Others    []string
 }
 
 func (q *Queries) UpsertHourse(ctx context.Context, arg UpsertHourseParams) error {
@@ -213,6 +216,7 @@ func (q *Queries) UpsertHourse(ctx context.Context, arg UpsertHourseParams) erro
 		arg.Area,
 		arg.MainArea,
 		arg.Raw,
+		pq.Array(arg.Others),
 	)
 	return err
 }

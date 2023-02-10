@@ -5,8 +5,8 @@ INSERT INTO city (name) VALUES (@name) ON CONFLICT(name) DO UPDATE SET name = @n
 INSERT INTO section (name, city_id) VALUES (@name, @city_id) ON CONFLICT(name, city_id) DO UPDATE SET name = @name RETURNING id;
 
 -- name: UpsertHourse :exec
-INSERT INTO hourse (section_id, link, layout, address, price, floor, shape, age, area, main_area, raw ,created_at, updated_at)
-VALUES (@section_id, @link, @layout, @address, @price, @floor, @shape, @age, @area, @main_area, @raw ,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+INSERT INTO hourse (section_id, link, layout, address, price, floor, shape, age, area, main_area, raw, others ,created_at, updated_at)
+VALUES (@section_id, @link, @layout, @address, @price, @floor, @shape, @age, @area, @main_area, @raw, @others ,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (link) DO UPDATE SET price = @price, raw = @raw, age = @age, updated_at = CURRENT_TIMESTAMP;
 
 -- name: GetHourses :many

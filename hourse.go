@@ -22,6 +22,7 @@ type UpsertHourseRequest struct {
 	Room     string   `json:"room,omitempty"`
 	Purpose  []string `json:"purpose,omitempty"`
 	Address  string   `json:"address"`
+	Others   []string `json:"others,omitempty"`
 }
 
 type GetHoursesRequest struct {
@@ -50,9 +51,12 @@ type GetHoursesResponse struct {
 }
 
 type Parser interface {
+	URL() string
 	HasNext() bool
 	UpdateCurrentPage()
-	FetchOne(ctx context.Context, pg pw.Page) ([]UpsertHourseRequest, error)
+	ItemQuerySelector() string
+	SetTotalRow(context.Context, func(ctx context.Context, qs string) (int, error)) error
+	FetchItem(item pw.ElementHandle) (UpsertHourseRequest, error)
 }
 
 type Postgres interface {

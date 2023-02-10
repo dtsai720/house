@@ -3,6 +3,7 @@ package parser
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/url"
 	"strconv"
@@ -18,9 +19,10 @@ type ParseSale struct {
 	FirstRow  int
 	PageSize  int
 	RegionID  int
+	MaxPrice  int
+	MinPrice  int
 	Selectors struct {
 		ListItem QuerySelector
-		Next     QuerySelector
 		Price    QuerySelector
 		Link     QuerySelector
 		Detail   QuerySelector
@@ -30,7 +32,7 @@ type ParseSale struct {
 	}
 }
 
-func NewHoueseParser(regionID int) hourse.Parser {
+func NewParseSale(regionID int) hourse.Parser {
 	var err error
 	var host *url.URL
 
@@ -41,10 +43,11 @@ func NewHoueseParser(regionID int) hourse.Parser {
 	output := new(ParseSale)
 	output.Host = *host
 	output.PageSize = 30
+	output.MaxPrice = 3000
+	output.MinPrice = 500
 	output.RegionID = regionID
 
 	output.Selectors.ListItem = QuerySelector{ClassName: []string{"houseList-item"}, TagName: "div"}
-	output.Selectors.Next = QuerySelector{ClassName: []string{"pageNext"}, TagName: "a"}
 	output.Selectors.Price = QuerySelector{ClassName: []string{"houseList-item-price"}, NextTagName: []string{"em"}, TagName: "div"}
 	output.Selectors.Link = QuerySelector{ClassName: []string{"houseList-item-title"}, NextTagName: []string{"a"}, TagName: "div"}
 	output.Selectors.Detail = QuerySelector{ClassName: []string{"houseList-item-attr-row"}, NextTagName: []string{"span"}, TagName: "div"}
@@ -61,11 +64,11 @@ func (ps ParseSale) SetField(field *hourse.UpsertHourseRequest, attr string, tex
 	case "houseList-item-attrs-layout":
 		field.Layout = text
 	case "houseList-item-attrs-area":
-		field.Area = ToValue(text)
+		field.Area = text
 	case "houseList-item-attrs-houseage":
 		field.Age = text
 	case "houseList-item-attrs-mainarea":
-		field.Mainarea = ToValue(text)
+		field.Mainarea = text
 	case "houseList-item-attrs-floor":
 		field.Floor = text
 	case "houseList-item-attrs-room":
@@ -73,47 +76,12 @@ func (ps ParseSale) SetField(field *hourse.UpsertHourseRequest, attr string, tex
 	case "houseList-item-attrs-purpose":
 		field.Purpose = append(field.Purpose, text)
 	default:
-		log.Printf("Attr: %s and Text: %s\n", attr, text)
+		field.Others = append(field.Others, text)
 	}
-}
-
-// 2023/02/09 23:07:33 Attr: houseList-item-attrs-kind and Text: 車位
-// 2023/02/09 23:07:33 Attr: houseList-item-attrs-cartmodel and Text: 平面式
-// 2023/02/09 23:07:33 Attr: houseList-item-attrs-carttype and Text: 室內地下
-
-func (ps ParseSale) URL() string {
-	params := url.Values{}
-	params.Set("shType", "list")
-	params.Set("price", "$_3000")
-	params.Set("regionid", strconv.Itoa(ps.RegionID))
-
-	if ps.TotalRows != 0 {
-		params.Set("firstRow", strconv.Itoa(ps.FirstRow))
-		params.Set("totalRows", strconv.Itoa(ps.TotalRows))
-	}
-
-	host := ps.Host
-	host.RawQuery = params.Encode()
-
-	log.Printf("current URL: %s\n\n", host.String())
-	return host.String()
 }
 
 func (ps ParseSale) Price(handle pw.ElementHandle) (int, error) {
-	var price string
-
-	if element, err := handle.QuerySelector(ps.Selectors.Price.Build()); err != nil {
-		return -1, err
-	} else if element == nil {
-		return 0, nil
-	} else if price, err = element.TextContent(); err != nil {
-		return -1, err
-	}
-
-	price = strings.ReplaceAll(price, ",", "")
-	price = strings.ReplaceAll(price, " ", "")
-
-	return strconv.Atoi(price)
+	return Price(handle, ps.Selectors.Price.Build())
 }
 
 func (ps ParseSale) Link(handle pw.ElementHandle) (string, error) {
@@ -140,9 +108,41 @@ func (ps ParseSale) City() string {
 		return "台北市"
 	case 3:
 		return "新北市"
+	case 6:
+		return "桃園市"
+	case 5:
+		return "新竹縣"
+	case 4:
+		return "新竹市"
+	case 15:
+		return "台南市"
+	case 17:
+		return "高雄市"
+	case 19:
+		return "屏東縣"
 	default:
 		return ""
 	}
+}
+
+func (ps ParseSale) ItemQuerySelector() string {
+	return ps.Selectors.ListItem.Build()
+}
+
+func (ps ParseSale) URL() string {
+	params := url.Values{}
+	params.Set("shType", "list")
+	params.Set("price", fmt.Sprintf("%d$_%d$", ps.MinPrice, ps.MaxPrice))
+	params.Set("regionid", strconv.Itoa(ps.RegionID))
+
+	if ps.TotalRows != 0 {
+		params.Set("firstRow", strconv.Itoa(ps.FirstRow))
+		params.Set("totalRows", strconv.Itoa(ps.TotalRows))
+	}
+
+	host := ps.Host
+	host.RawQuery = params.Encode()
+	return host.String()
 }
 
 func (ps ParseSale) FetchItem(item pw.ElementHandle) (hourse.UpsertHourseRequest, error) {
@@ -192,54 +192,13 @@ func (ps ParseSale) FetchItem(item pw.ElementHandle) (hourse.UpsertHourseRequest
 	return result, err
 }
 
-func (ps *ParseSale) SetTotalRow(ctx context.Context, pg pw.Page) error {
-	var num int
-	qs := ps.Selectors.Total.Build()
-
+func (ps *ParseSale) SetTotalRow(ctx context.Context, f func(ctx context.Context, qs string) (int, error)) error {
 	if ps.TotalRows != 0 {
 		return nil
-	} else if _, err := pg.WaitForSelector(qs); err != nil {
-		return err
-	} else if element, err := pg.QuerySelector(qs); err != nil {
-		return err
-	} else if value, err := element.TextContent(); err != nil {
-		return err
-	} else if num, err = strconv.Atoi(value); err != nil {
-		return err
 	}
-
-	ps.TotalRows = num
-	return nil
-}
-
-func (ps *ParseSale) FetchOne(ctx context.Context, pg pw.Page) ([]hourse.UpsertHourseRequest, error) {
 	var err error
-	var items []pw.ElementHandle
-	qs := ps.Selectors.ListItem.Build()
-
-	if _, err = pg.Goto(ps.URL()); err != nil {
-		return nil, err
-	} else if err = ps.SetTotalRow(ctx, pg); err != nil {
-		return nil, err
-	} else if _, err = pg.WaitForSelector(qs); err != nil {
-		return nil, err
-	} else if items, err = pg.QuerySelectorAll(qs); err != nil {
-		return nil, err
-	}
-
-	var output []hourse.UpsertHourseRequest
-	for _, item := range items {
-		var result hourse.UpsertHourseRequest
-		var err error
-
-		if result, err = ps.FetchItem(item); err != nil {
-			continue
-		}
-
-		output = append(output, result)
-	}
-
-	return output, nil
+	ps.TotalRows, err = f(ctx, ps.Selectors.Total.Build())
+	return err
 }
 
 func (ps *ParseSale) UpdateCurrentPage() {
