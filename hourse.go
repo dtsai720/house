@@ -50,7 +50,7 @@ type GetHoursesResponse struct {
 	Location    string         `json:"location"`
 }
 
-type Parser interface {
+type ParserService interface {
 	URL() string
 	HasNext() bool
 	UpdateCurrentPage()
@@ -65,7 +65,6 @@ type Postgres interface {
 }
 
 type Service interface {
-	FetchAll(ctx context.Context, bp Parser) error
 	Upsert(ctx context.Context, in UpsertHourseRequest) error
 	Get(ctx context.Context, in GetHoursesRequest) (int64, []GetHoursesResponse, error)
 }

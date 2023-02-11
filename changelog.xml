@@ -11,6 +11,7 @@
 
     <include file="postgres/tables/city.sql"/>
 	<include file="postgres/tables/section.sql"/>
+	<include file="postgres/tables/shape.sql"/>
 	<include file="postgres/tables/hourse.sql"/>
 
 </databaseChangeLog>

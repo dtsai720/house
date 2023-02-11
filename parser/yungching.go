@@ -29,7 +29,7 @@ type ParseYungChing struct {
 	}
 }
 
-func NewParseYungChing(city string) hourse.Parser {
+func NewParseYungChing(city string) hourse.ParserService {
 	yc := new(ParseYungChing)
 	yc.PageSize = 30
 	yc.CurrentPage = 1

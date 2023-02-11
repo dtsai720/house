@@ -23,12 +23,12 @@ type Hourse struct {
 	ID          int64
 	UniversalID uuid.UUID
 	SectionID   int32
+	ShapeID     int32
 	Link        string
 	Layout      sql.NullString
 	Address     sql.NullString
 	Price       string
 	Floor       string
-	Shape       string
 	Age         string
 	Area        string
 	MainArea    sql.NullString
@@ -42,6 +42,13 @@ type Hourse struct {
 type Section struct {
 	ID        int64
 	CityID    int32
+	Name      string
+	CreatedAt time.Time
+	DeletedAt sql.NullTime
+}
+
+type Shape struct {
+	ID        int64
 	Name      string
 	CreatedAt time.Time
 	DeletedAt sql.NullTime

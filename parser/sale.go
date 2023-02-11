@@ -32,7 +32,7 @@ type ParseSale struct {
 	}
 }
 
-func NewParseSale(regionID int) hourse.Parser {
+func NewParseSale(regionID int) hourse.ParserService {
 	var err error
 	var host *url.URL
 

@@ -15,6 +15,22 @@ import (
 	"github.com/lib/pq"
 )
 
+const getCity = `-- name: GetCity :one
+SELECT id, name, created_at, deleted_at FROM city WHERE name = $1
+`
+
+func (q *Queries) GetCity(ctx context.Context, name string) (City, error) {
+	row := q.db.QueryRowContext(ctx, getCity, name)
+	var i City
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const getHourses = `-- name: GetHourses :many
 WITH duplicate_conditions AS (
     SELECT MIN(id) AS id, section_id, address, age, area
@@ -40,53 +56,56 @@ duplicate AS (
 candidates AS (
 SELECT hourse.id
 FROM hourse
-LEFT JOIN section ON(hourse.section_id = section.id)
-LEFT JOIN city ON(hourse.city_id = city.id)
+INNER JOIN section ON(hourse.section_id = section.id)
+INNER JOIN city ON(section.city_id = city.id)
+INNER JOIN shape ON(hourse.shape_id = shape.id)
 WHERE hourse.updated_at > CURRENT_TIMESTAMP - INTERVAL '7 day'
     AND hourse.id NOT IN (SELECT id FROM duplicate)
-    AND (city.name = ANY($1 :: VARCHAR[]) OR COALESCE($1, '') = '')
-    AND (hourse.shape IN ($2 :: VARCHAR[]) OR COALESCE($2, '') = '')
-    AND (section.name IN ($3 :: VARCHAR[]) OR COALESCE($3, '') = '')
-    AND (hourse.price <= $4 :: DECIMAL OR COALESCE($4, '') = '')
-    AND (hourse.price > $5 :: DECIMAL OR COALESCE($5, '') = '')
-    AND (hourse.age < $6 OR COALESCE($6, '') = '')
-    AND (hourse.main_area <= $7 :: DECIMAL OR COALESCE($7, '') = '')
-    AND (hourse.main_area > $8 :: DECIMAL OR COALESCE($8, '') = '')
+    AND (COALESCE($1, '') = '' OR city.name = ANY(string_to_array($1, ',')))
+    AND (COALESCE($2, '') = '' OR section.name = ANY(string_to_array($2, ',')))
+    AND (COALESCE($3, '') = '' OR hourse.shape = ANY(string_to_array($3, ',')))
+    AND (COALESCE($4, '') = '' OR hourse.price <= $4 :: DECIMAL)
+    AND (COALESCE($5, '') = '' OR hourse.price > $5 :: DECIMAL)
+    AND (COALESCE($6, '') = '' OR hourse.age < $6)
+    AND (COALESCE($7, '') = '' OR hourse.main_area <= $7 :: DECIMAL)
+    AND (COALESCE($8, '') = '' OR hourse.main_area > $8 :: DECIMAL)
 )
 SELECT
-    hourse.id, hourse.universal_id, hourse.section_id, hourse.link, hourse.layout, hourse.address, hourse.price, hourse.floor, hourse.shape, hourse.age, hourse.area, hourse.main_area, hourse.raw, hourse.others, hourse.created_at, hourse.updated_at, hourse.deleted_at,
+    hourse.id, hourse.universal_id, hourse.section_id, hourse.shape_id, hourse.link, hourse.layout, hourse.address, hourse.price, hourse.floor, hourse.age, hourse.area, hourse.main_area, hourse.raw, hourse.others, hourse.created_at, hourse.updated_at, hourse.deleted_at,
     CONCAT(city.name, section.name, hourse.address) :: VARCHAR AS location,
     city.name :: TEXT AS city,
     section.name :: TEXT AS section,
+    shape.name :: TEXT AS shape,
     (SELECT COUNT(1) FROM candidates) AS total_count
 FROM hourse
 INNER JOIN candidates USING(id)
-LEFT JOIN section ON (section.id=hourse.section_id)
-LEFT JOIN city ON (city.id=section.city_id)
+INNER JOIN section ON (section.id = hourse.section_id)
+INNER JOIN shape ON(shape.id = hourse.shape_id)
+INNER JOIN city ON (city.id = section.city_id)
 ORDER BY hourse.age, hourse.price, hourse.main_area
 `
 
 type GetHoursesParams struct {
-	City        []string
-	Shape       []string
-	Section     []string
-	MaxPrice    string
-	MinPrice    string
-	Age         string
-	MaxMainArea string
-	MinMainArea string
+	City        interface{}
+	Section     interface{}
+	Shape       interface{}
+	MaxPrice    interface{}
+	MinPrice    interface{}
+	Age         interface{}
+	MaxMainArea interface{}
+	MinMainArea interface{}
 }
 
 type GetHoursesRow struct {
 	ID          int64
 	UniversalID uuid.UUID
 	SectionID   int32
+	ShapeID     int32
 	Link        string
 	Layout      sql.NullString
 	Address     sql.NullString
 	Price       string
 	Floor       string
-	Shape       string
 	Age         string
 	Area        string
 	MainArea    sql.NullString
@@ -98,14 +117,15 @@ type GetHoursesRow struct {
 	Location    string
 	City        string
 	Section     string
+	Shape       string
 	TotalCount  int64
 }
 
 func (q *Queries) GetHourses(ctx context.Context, arg GetHoursesParams) ([]GetHoursesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getHourses,
-		pq.Array(arg.City),
-		pq.Array(arg.Shape),
-		pq.Array(arg.Section),
+		arg.City,
+		arg.Section,
+		arg.Shape,
 		arg.MaxPrice,
 		arg.MinPrice,
 		arg.Age,
@@ -123,12 +143,12 @@ func (q *Queries) GetHourses(ctx context.Context, arg GetHoursesParams) ([]GetHo
 			&i.ID,
 			&i.UniversalID,
 			&i.SectionID,
+			&i.ShapeID,
 			&i.Link,
 			&i.Layout,
 			&i.Address,
 			&i.Price,
 			&i.Floor,
-			&i.Shape,
 			&i.Age,
 			&i.Area,
 			&i.MainArea,
@@ -140,6 +160,7 @@ func (q *Queries) GetHourses(ctx context.Context, arg GetHoursesParams) ([]GetHo
 			&i.Location,
 			&i.City,
 			&i.Section,
+			&i.Shape,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err
@@ -153,6 +174,39 @@ func (q *Queries) GetHourses(ctx context.Context, arg GetHoursesParams) ([]GetHo
 		return nil, err
 	}
 	return items, nil
+}
+
+const getSection = `-- name: GetSection :one
+SELECT id, city_id, name, created_at, deleted_at FROM section WHERE name = $1
+`
+
+func (q *Queries) GetSection(ctx context.Context, name string) (Section, error) {
+	row := q.db.QueryRowContext(ctx, getSection, name)
+	var i Section
+	err := row.Scan(
+		&i.ID,
+		&i.CityID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getShape = `-- name: GetShape :one
+SELECT id, name, created_at, deleted_at FROM shape WHERE name = $1
+`
+
+func (q *Queries) GetShape(ctx context.Context, name string) (Shape, error) {
+	row := q.db.QueryRowContext(ctx, getShape, name)
+	var i Shape
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }
 
 const insertCity = `-- name: InsertCity :one
@@ -182,8 +236,19 @@ func (q *Queries) InsertSection(ctx context.Context, arg InsertSectionParams) (i
 	return id, err
 }
 
+const insertShape = `-- name: InsertShape :one
+INSERT INTO shape (name) VALUES ($1) ON CONFLICT(name) DO UPDATE SET name = $1 RETURNING id
+`
+
+func (q *Queries) InsertShape(ctx context.Context, name string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, insertShape, name)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
 const upsertHourse = `-- name: UpsertHourse :exec
-INSERT INTO hourse (section_id, link, layout, address, price, floor, shape, age, area, main_area, raw, others ,created_at, updated_at)
+INSERT INTO hourse (section_id, link, layout, address, price, floor, shape_id, age, area, main_area, raw, others ,created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 ,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (link) DO UPDATE SET price = $5, raw = $11, age = $8, updated_at = CURRENT_TIMESTAMP
 `
@@ -195,7 +260,7 @@ type UpsertHourseParams struct {
 	Address   sql.NullString
 	Price     string
 	Floor     string
-	Shape     string
+	ShapeID   int32
 	Age       string
 	Area      string
 	MainArea  sql.NullString
@@ -211,7 +276,7 @@ func (q *Queries) UpsertHourse(ctx context.Context, arg UpsertHourseParams) erro
 		arg.Address,
 		arg.Price,
 		arg.Floor,
-		arg.Shape,
+		arg.ShapeID,
 		arg.Age,
 		arg.Area,
 		arg.MainArea,

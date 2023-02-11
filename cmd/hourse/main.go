@@ -35,7 +35,7 @@ func FirefoxEvent(ctx context.Context, db hourse.Postgres, pw *playwright.Playwr
 
 	defer page.Close()
 
-	service := hourse.NewService(page, db)
+	service := parser.NewService(page)
 	// cities := []string{"台北市", "新北市", "桃園市", "新竹縣", "台南市", "高雄市", "屏東縣"}
 	cities := []string{"台北市", "新北市"}
 	for _, city := range cities {
@@ -59,7 +59,7 @@ func ChromiumEvent(ctx context.Context, db hourse.Postgres, pw *playwright.Playw
 
 	defer page.Close()
 
-	service := hourse.NewService(page, db)
+	service := parser.NewService(page)
 	// regions := []int{1, 3, 4, 5, 6, 15, 17, 19}
 	regions := []int{1, 3}
 	for _, num := range regions {
@@ -91,7 +91,7 @@ func main() {
 
 	srv := new(http.Server)
 	srv.Addr = ":8000"
-	srv.Handler = hrhttp.NewServer(chi.NewMux(), hourse.NewService(nil, db))
+	srv.Handler = hrhttp.NewServer(chi.NewMux(), hourse.NewService(db))
 
 	ctx, cancel := context.WithCancel(context.Background())
 
