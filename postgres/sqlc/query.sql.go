@@ -63,7 +63,7 @@ WHERE hourse.updated_at > CURRENT_TIMESTAMP - INTERVAL '7 day'
     AND hourse.id NOT IN (SELECT id FROM duplicate)
     AND (COALESCE($1, '') = '' OR city.name = ANY(string_to_array($1, ',')))
     AND (COALESCE($2, '') = '' OR section.name = ANY(string_to_array($2, ',')))
-    AND (COALESCE($3, '') = '' OR hourse.shape = ANY(string_to_array($3, ',')))
+    AND (COALESCE($3, '') = '' OR shape.name = ANY(string_to_array($3, ',')))
     AND (COALESCE($4, '') = '' OR hourse.price <= $4 :: DECIMAL)
     AND (COALESCE($5, '') = '' OR hourse.price > $5 :: DECIMAL)
     AND (COALESCE($6, '') = '' OR hourse.age < $6)
@@ -97,7 +97,7 @@ type GetHoursesParams struct {
 }
 
 type GetHoursesRow struct {
-	ID          int64
+	ID          int32
 	UniversalID uuid.UUID
 	SectionID   int32
 	ShapeID     int32
@@ -210,18 +210,23 @@ func (q *Queries) GetShape(ctx context.Context, name string) (Shape, error) {
 }
 
 const insertCity = `-- name: InsertCity :one
-INSERT INTO city (name) VALUES ($1) ON CONFLICT(name) DO UPDATE SET name = $1 RETURNING id
+INSERT INTO city (name) VALUES ($1) ON CONFLICT(name) DO NOTHING RETURNING id, name, created_at, deleted_at
 `
 
-func (q *Queries) InsertCity(ctx context.Context, name string) (int64, error) {
+func (q *Queries) InsertCity(ctx context.Context, name string) (City, error) {
 	row := q.db.QueryRowContext(ctx, insertCity, name)
-	var id int64
-	err := row.Scan(&id)
-	return id, err
+	var i City
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }
 
 const insertSection = `-- name: InsertSection :one
-INSERT INTO section (name, city_id) VALUES ($1, $2) ON CONFLICT(name, city_id) DO UPDATE SET name = $1 RETURNING id
+INSERT INTO section (name, city_id) VALUES ($1, $2) ON CONFLICT(name, city_id) DO NOTHING RETURNING id, city_id, name, created_at, deleted_at
 `
 
 type InsertSectionParams struct {
@@ -229,22 +234,33 @@ type InsertSectionParams struct {
 	CityID int32
 }
 
-func (q *Queries) InsertSection(ctx context.Context, arg InsertSectionParams) (int64, error) {
+func (q *Queries) InsertSection(ctx context.Context, arg InsertSectionParams) (Section, error) {
 	row := q.db.QueryRowContext(ctx, insertSection, arg.Name, arg.CityID)
-	var id int64
-	err := row.Scan(&id)
-	return id, err
+	var i Section
+	err := row.Scan(
+		&i.ID,
+		&i.CityID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }
 
 const insertShape = `-- name: InsertShape :one
-INSERT INTO shape (name) VALUES ($1) ON CONFLICT(name) DO UPDATE SET name = $1 RETURNING id
+INSERT INTO shape (name) VALUES ($1) ON CONFLICT(name) DO NOTHING RETURNING id, name, created_at, deleted_at
 `
 
-func (q *Queries) InsertShape(ctx context.Context, name string) (int64, error) {
+func (q *Queries) InsertShape(ctx context.Context, name string) (Shape, error) {
 	row := q.db.QueryRowContext(ctx, insertShape, name)
-	var id int64
-	err := row.Scan(&id)
-	return id, err
+	var i Shape
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }
 
 const upsertHourse = `-- name: UpsertHourse :exec

@@ -2,8 +2,8 @@
 
 --changeset hourse:1
 CREATE TABLE IF NOT EXISTS hourse(
-    id BIGSERIAL PRIMARY KEY,
-    universal_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    id SERIAL PRIMARY KEY,
+    universal_id UUID NOT NULL DEFAULT gen_random_uuid(),
     section_id INTEGER NOT NULL,
     shape_id INTEGER NOT NULL,
     link VARCHAR(255) NOT NULL,
@@ -18,9 +18,15 @@ CREATE TABLE IF NOT EXISTS hourse(
     others VARCHAR[],
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP WITH TIME ZONE,
-    CONSTRAINT hourse_link_unique UNIQUE(link),
-    CONSTRAINT hourse_universal_id_unique UNIQUE(universal_id),
-    CONSTRAINT hourse_section_id_foreign FOREIGN KEY (section_id) REFERENCES section(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT hourse_shape_id_foreign FOREIGN KEY (shape_id) REFERENCES shape(id) ON UPDATE CASCADE ON DELETE CASCADE
+    deleted_at TIMESTAMP WITH TIME ZONE
 );
+
+--changeset hourse:2
+BEGIN TRANSACTION;
+CREATE UNIQUE INDEX ON hourse(link);
+CREATE INDEX ON hourse(section_id);
+CREATE INDEX ON hourse(shape_id);
+ALTER TABLE hourse ADD FOREIGN KEY (section_id) REFERENCES section(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE hourse ADD FOREIGN KEY (shape_id) REFERENCES shape(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE hourse ADD CHECK(price > 0);
+COMMIT;

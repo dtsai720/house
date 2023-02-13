@@ -1,17 +1,17 @@
 -- name: InsertCity :one
-INSERT INTO city (name) VALUES (@name) ON CONFLICT(name) DO UPDATE SET name = @name RETURNING id;
+INSERT INTO city (name) VALUES (@name) ON CONFLICT(name) DO NOTHING RETURNING *;
 
 -- name: GetCity :one
 SELECT * FROM city WHERE name = @name;
 
 -- name: InsertSection :one
-INSERT INTO section (name, city_id) VALUES (@name, @city_id) ON CONFLICT(name, city_id) DO UPDATE SET name = @name RETURNING id;
+INSERT INTO section (name, city_id) VALUES (@name, @city_id) ON CONFLICT(name, city_id) DO NOTHING RETURNING *;
 
 -- name: GetSection :one
 SELECT * FROM section WHERE name = @name;
 
 -- name: InsertShape :one
-INSERT INTO shape (name) VALUES (@name) ON CONFLICT(name) DO UPDATE SET name = @name RETURNING id;
+INSERT INTO shape (name) VALUES (@name) ON CONFLICT(name) DO NOTHING RETURNING *;
 
 -- name: GetShape :one
 SELECT * FROM shape WHERE name = @name;
@@ -53,7 +53,7 @@ WHERE hourse.updated_at > CURRENT_TIMESTAMP - INTERVAL '7 day'
     AND hourse.id NOT IN (SELECT id FROM duplicate)
     AND (COALESCE(@city, '') = '' OR city.name = ANY(string_to_array(@city, ',')))
     AND (COALESCE(@section, '') = '' OR section.name = ANY(string_to_array(@section, ',')))
-    AND (COALESCE(@shape, '') = '' OR hourse.shape = ANY(string_to_array(@shape, ',')))
+    AND (COALESCE(@shape, '') = '' OR shape.name = ANY(string_to_array(@shape, ',')))
     AND (COALESCE(@max_price, '') = '' OR hourse.price <= @max_price :: DECIMAL)
     AND (COALESCE(@min_price, '') = '' OR hourse.price > @min_price :: DECIMAL)
     AND (COALESCE(@age, '') = '' OR hourse.age < @age)

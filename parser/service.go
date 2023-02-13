@@ -7,7 +7,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -34,18 +33,6 @@ func ToValue(in string) string {
 	return sb.String()
 }
 
-func (hs Service) GetTotalRow(ctx context.Context, qs string) (int, error) {
-	var value string
-	if _, err := hs.page.WaitForSelector(qs); err != nil {
-		return -1, err
-	} else if element, err := hs.page.QuerySelector(qs); err != nil {
-		return -1, err
-	} else if value, err = element.TextContent(); err != nil {
-		return -1, err
-	}
-	return strconv.Atoi(ToValue(value))
-}
-
 func (hs Service) FetchOne(ctx context.Context, bp hourse.ParserService) ([]hourse.UpsertHourseRequest, error) {
 	var err error
 	var items []pw.ElementHandle
@@ -55,7 +42,7 @@ func (hs Service) FetchOne(ctx context.Context, bp hourse.ParserService) ([]hour
 
 	if _, err = hs.page.Goto(bp.URL()); err != nil {
 		return nil, err
-	} else if err = bp.SetTotalRow(ctx, hs.GetTotalRow); err != nil {
+	} else if err = bp.SetTotalRow(ctx, hs.page); err != nil {
 		return nil, err
 	} else if _, err = hs.page.WaitForSelector(qs); err != nil {
 		return nil, err
@@ -72,6 +59,23 @@ func (hs Service) FetchOne(ctx context.Context, bp hourse.ParserService) ([]hour
 			continue
 		}
 
+		result.City = strings.TrimSpace(result.City)
+		result.Section = strings.TrimSpace(result.Section)
+		result.Link = strings.TrimSpace(result.Link)
+		result.Floor = strings.TrimSpace(result.Floor)
+		result.Age = strings.TrimSpace(result.Age)
+		result.Mainarea = strings.TrimSpace(result.Mainarea)
+		result.Area = strings.TrimSpace(result.Area)
+		result.Layout = strings.TrimSpace(result.Layout)
+		result.Shape = strings.TrimSpace(result.Shape)
+		result.Room = strings.TrimSpace(result.Room)
+		result.Address = strings.TrimSpace(result.Address)
+		for i := 0; i < len(result.Purpose); i++ {
+			result.Purpose[i] = strings.TrimSpace(result.Purpose[i])
+		}
+		for i := 0; i < len(result.Others); i++ {
+			result.Others[i] = strings.TrimSpace(result.Others[i])
+		}
 		output = append(output, result)
 	}
 

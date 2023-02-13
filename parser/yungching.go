@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"path"
+	"strconv"
 	"strings"
 
 	"github.com/hourse"
@@ -33,10 +35,11 @@ func NewParseYungChing(city string) hourse.ParserService {
 	yc := new(ParseYungChing)
 	yc.PageSize = 30
 	yc.CurrentPage = 1
-	yc.TotalPage = 0
+	yc.TotalPage = -1
 	yc.City = city
 	yc.MaxPrice = 3000
 	yc.MinPrice = 500
+
 	yc.Selectors.ListItem = QuerySelector{ClassName: []string{"m-list-item"}, TagName: "li"}
 	yc.Selectors.Link = QuerySelector{ClassName: []string{"item-img", "ga_click_trace"}, TagName: "a"}
 	yc.Selectors.Total = QuerySelector{ClassName: []string{"list-filter", "is-first", "active", "ng-isolate-scope"}, NextTagName: []string{"span"}, TagName: "a"}
@@ -47,13 +50,16 @@ func NewParseYungChing(city string) hourse.ParserService {
 }
 
 func (yc ParseYungChing) URL() string {
-	return fmt.Sprintf(
-		"https://buy.yungching.com.tw/region/%s-_c/%d-%d_price/_rm/?pg=%d",
-		yc.City, yc.MinPrice, yc.MaxPrice, yc.CurrentPage)
+	return path.Join(
+		"https://buy.yungching.com.tw/region",
+		fmt.Sprintf("%s-_c", yc.City),
+		fmt.Sprintf("%d-%d_price", yc.MinPrice, yc.MaxPrice),
+		fmt.Sprintf("_rm/?pg=%d", yc.CurrentPage),
+	)
 }
 
 func (yc ParseYungChing) HasNext() bool {
-	return yc.TotalPage == 0 || yc.TotalPage > yc.CurrentPage
+	return yc.TotalPage == -1 || yc.CurrentPage < yc.TotalPage
 }
 
 func (yc ParseYungChing) ItemQuerySelector() string {
@@ -64,22 +70,25 @@ func (yc *ParseYungChing) UpdateCurrentPage() {
 	yc.CurrentPage++
 }
 
-func (yc *ParseYungChing) SetTotalRow(ctx context.Context, f func(ctx context.Context, qs string) (int, error)) error {
-	if yc.TotalPage != 0 {
+func (yc *ParseYungChing) SetTotalRow(ctx context.Context, pg pw.Page) error {
+	if yc.TotalPage != -1 {
 		return nil
 	}
 
-	rows, err := f(ctx, yc.Selectors.Total.Build())
-	if err != nil {
+	qs := yc.Selectors.Total.Build()
+
+	var value int
+	if _, err := pg.WaitForSelector(qs); err != nil {
+		return err
+	} else if element, err := pg.QuerySelector(qs); err != nil {
+		return err
+	} else if text, err := element.TextContent(); err != nil {
+		return err
+	} else if value, err = strconv.Atoi(ToValue(text)); err != nil {
 		return err
 	}
 
-	count := 0
-	if rows%yc.PageSize != 0 {
-		count++
-	}
-
-	yc.TotalPage = rows/yc.PageSize + count
+	yc.TotalPage = value / yc.PageSize
 	return nil
 }
 
@@ -123,17 +132,7 @@ func (yc ParseYungChing) Address(item pw.ElementHandle, in *hourse.UpsertHourseR
 	}
 
 	address = strings.Replace(address, yc.City, "", 1)
-
-	var sb strings.Builder
-	for _, char := range address {
-		sb.WriteRune(char)
-		if char == '鄉' || char == '鎮' || char == '市' || char == '區' {
-			break
-		}
-	}
-
-	in.Section = sb.String()
-	in.Address = strings.Replace(address, in.Section, "", 1)
+	in.Section, in.Address = SeparateSectionAndAddress(address)
 	return nil
 }
 

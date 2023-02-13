@@ -11,6 +11,7 @@ func NewService(db Postgres) Service {
 }
 
 func (hs HourseService) Upsert(ctx context.Context, in UpsertHourseRequest) error {
+
 	return hs.db.Upsert(ctx, in)
 }
 

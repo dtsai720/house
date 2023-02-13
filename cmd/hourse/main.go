@@ -42,6 +42,11 @@ func FirefoxEvent(ctx context.Context, db hourse.Postgres, pw *playwright.Playwr
 		item := parser.NewParseYungChing(city)
 		service.FetchAll(ctx, item)
 	}
+
+	for _, city := range []string{"Taipei", "NewTaipei"} {
+		item := parser.NewParseSinYi(city)
+		service.FetchAll(ctx, item)
+	}
 }
 
 func ChromiumEvent(ctx context.Context, db hourse.Postgres, pw *playwright.Playwright) {

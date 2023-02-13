@@ -13,14 +13,14 @@ import (
 )
 
 type City struct {
-	ID        int64
+	ID        int32
 	Name      string
 	CreatedAt time.Time
 	DeletedAt sql.NullTime
 }
 
 type Hourse struct {
-	ID          int64
+	ID          int32
 	UniversalID uuid.UUID
 	SectionID   int32
 	ShapeID     int32
@@ -40,7 +40,7 @@ type Hourse struct {
 }
 
 type Section struct {
-	ID        int64
+	ID        int32
 	CityID    int32
 	Name      string
 	CreatedAt time.Time
@@ -48,7 +48,7 @@ type Section struct {
 }
 
 type Shape struct {
-	ID        int64
+	ID        int32
 	Name      string
 	CreatedAt time.Time
 	DeletedAt sql.NullTime

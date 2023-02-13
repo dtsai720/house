@@ -2,7 +2,6 @@ package hourse
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/google/uuid"
 	pw "github.com/playwright-community/playwright-go"
@@ -37,17 +36,17 @@ type GetHoursesRequest struct {
 }
 
 type GetHoursesResponse struct {
-	UniversalID uuid.UUID      `json:"universal_id"`
-	Link        string         `json:"link"`
-	Layout      sql.NullString `json:"layout,omitempty"`
-	Address     sql.NullString `json:"address,omitempty"`
-	Price       string         `json:"price"`
-	Floor       string         `json:"floor"`
-	Shape       string         `json:"shape"`
-	Age         string         `json:"age"`
-	Area        string         `json:"area"`
-	MainArea    sql.NullString `json:"main_area,omitempty"`
-	Location    string         `json:"location"`
+	UniversalID uuid.UUID `json:"universal_id"`
+	Link        string    `json:"link"`
+	Layout      string    `json:"layout,omitempty"`
+	Address     string    `json:"address,omitempty"`
+	Price       string    `json:"price"`
+	Floor       string    `json:"floor"`
+	Shape       string    `json:"shape"`
+	Age         string    `json:"age"`
+	Area        string    `json:"area"`
+	MainArea    string    `json:"main_area,omitempty"`
+	Location    string    `json:"location"`
 }
 
 type ParserService interface {
@@ -55,7 +54,7 @@ type ParserService interface {
 	HasNext() bool
 	UpdateCurrentPage()
 	ItemQuerySelector() string
-	SetTotalRow(context.Context, func(ctx context.Context, qs string) (int, error)) error
+	SetTotalRow(context.Context, pw.Page) error
 	FetchItem(item pw.ElementHandle) (UpsertHourseRequest, error)
 }
 

@@ -40,8 +40,21 @@ func Price(handle pw.ElementHandle, qs string) (int, error) {
 		return -1, err
 	}
 
+	price = strings.TrimSpace(price)
 	price = strings.ReplaceAll(price, ",", "")
 	price = strings.ReplaceAll(price, " ", "")
 
 	return strconv.Atoi(price)
+}
+
+func SeparateSectionAndAddress(address string) (string, string) {
+	var sb strings.Builder
+	for _, char := range address {
+		sb.WriteRune(char)
+		if char == '鄉' || char == '鎮' || char == '市' || char == '區' {
+			break
+		}
+	}
+	section := sb.String()
+	return section, strings.Replace(address, section, "", 1)
 }
