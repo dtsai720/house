@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"path"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -34,8 +34,7 @@ func NewParseSinYi(city string) hourse.ParserService {
 	sy := new(ParseSinYi)
 	sy.PageSize = 20
 	sy.CurrentPage = 1
-	// sy.TotalPage = -1
-	sy.TotalPage = 2
+	sy.TotalPage = -1
 	sy.City = city
 	sy.MaxPrice = 3000
 	sy.MinPrice = 500
@@ -77,8 +76,28 @@ func (sy ParseSinYi) GetCity() string {
 		return "台北市"
 	case "NewTaipei":
 		return "新北市"
+	case "Hsinchu-city":
+		return "新竹市"
+	case "Hsinchu-county":
+		return "新竹縣"
+	case "Taoyuan-city":
+		return "桃園市"
+	case "Kaohsiung-city":
+		return "高雄市"
 	default:
 		return ""
+	}
+}
+
+func (sy ParseSinYi) Link(item pw.ElementHandle) (string, error) {
+	if path, err := item.GetAttribute("href"); err != nil {
+		return "", err
+	} else if host, err := url.Parse("https://www.sinyi.com.tw"); err != nil {
+		return "", err
+	} else if uri, err := url.Parse(path); err != nil {
+		return "", err
+	} else {
+		return host.ResolveReference(uri).String(), nil
 	}
 }
 
@@ -94,11 +113,9 @@ func (sy *ParseSinYi) FetchItem(item pw.ElementHandle) (hourse.UpsertHourseReque
 		return result, err
 	} else if len(elements) == 0 {
 		return result, errors.New("error qs when link")
-	} else if result.Link, err = elements[0].GetAttribute("href"); err != nil {
+	} else if result.Link, err = sy.Link(elements[0]); err != nil {
 		return result, err
 	}
-
-	result.Link = path.Join("https://www.sinyi.com.tw/", result.Link)
 
 	result.Price, err = sy.Price(item)
 	if err != nil {
@@ -194,15 +211,15 @@ func (sy *ParseSinYi) UpdateCurrentPage() {
 }
 
 func (sy ParseSinYi) HasNext() bool {
-	return sy.TotalPage == -1 || sy.CurrentPage < sy.TotalPage
+	return sy.TotalPage == -1 || sy.CurrentPage <= sy.TotalPage
 }
 
 func (sy ParseSinYi) URL() string {
-	return path.Join(
+	return strings.Join([]string{
 		"https://www.sinyi.com.tw/buy/list",
 		fmt.Sprintf("%d-%d-price", sy.MinPrice, sy.MaxPrice),
 		fmt.Sprintf("%s-city", sy.City),
 		"Taipei-R-mrtline/03-mrt/default-desc",
 		strconv.Itoa(sy.CurrentPage),
-	)
+	}, "/")
 }

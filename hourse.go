@@ -8,10 +8,10 @@ import (
 )
 
 type UpsertHourseRequest struct {
-	City     string   `json:"city"`
-	Section  string   `json:"section"`
-	Price    int      `json:"price"`
-	Link     string   `json:"link"`
+	City     string   `json:"city" validate:"required"`
+	Section  string   `json:"section" validate:"required"`
+	Price    int      `json:"price" validate:"required"`
+	Link     string   `json:"link" validate:"required"`
 	Floor    string   `json:"floor,omitempty"`
 	Age      string   `json:"age,omitempty"`
 	Mainarea string   `json:"mainarea,omitempty"`
@@ -20,7 +20,7 @@ type UpsertHourseRequest struct {
 	Shape    string   `json:"shape,omitempty"`
 	Room     string   `json:"room,omitempty"`
 	Purpose  []string `json:"purpose,omitempty"`
-	Address  string   `json:"address"`
+	Address  string   `json:"address" validate:"required"`
 	Others   []string `json:"others,omitempty"`
 }
 

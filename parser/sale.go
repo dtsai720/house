@@ -55,7 +55,6 @@ func NewParseSale(regionID int) hourse.ParserService {
 	output.Selectors.Price = QuerySelector{ClassName: []string{"houseList-item-price"}, NextTagName: []string{"em"}, TagName: "div"}
 	output.Selectors.Link = QuerySelector{ClassName: []string{"houseList-item-title"}, NextTagName: []string{"a"}, TagName: "div"}
 	output.Selectors.Detail = QuerySelector{ClassName: []string{"houseList-item-attr-row"}, NextTagName: []string{"span"}, TagName: "div"}
-	// output.Selectors.Total = QuerySelector{ClassName: []string{"houseList-head-title", "pull-left"}, NextTagName: []string{"p", "em"}, TagName: "div"}
 	output.Selectors.Total = QuerySelector{ClassName: []string{"pageNum-form"}, TagName: "a"}
 	output.Selectors.Section = QuerySelector{ClassName: []string{"houseList-item-section"}, TagName: "span"}
 	output.Selectors.Address = QuerySelector{ClassName: []string{"houseList-item-address"}, TagName: "span"}
@@ -232,5 +231,5 @@ func (ps *ParseSale) UpdateCurrentPage() {
 }
 
 func (ps ParseSale) HasNext() bool {
-	return ps.TotalPage == -1 || ps.CurrentPage < ps.TotalPage
+	return ps.TotalPage == -1 || ps.CurrentPage <= ps.TotalPage
 }

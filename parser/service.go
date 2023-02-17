@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -15,12 +16,14 @@ import (
 )
 
 type Service struct {
-	page   pw.Page
-	client *http.Client
-}
-
-func NewService(page pw.Page) Service {
-	return Service{page: page, client: new(http.Client)}
+	client     *http.Client
+	count      int
+	resetCount int
+	browser    struct {
+		browserType pw.BrowserType
+		browser     pw.Browser
+		page        pw.Page
+	}
 }
 
 func ToValue(in string) string {
@@ -33,6 +36,48 @@ func ToValue(in string) string {
 	return sb.String()
 }
 
+func NewService(bt pw.BrowserType) Service {
+	var output Service
+	var err error
+	output.client = new(http.Client)
+	output.count = 0
+	output.browser.browserType = bt
+	output.resetCount = 100
+
+	if output.browser.browser, err = bt.Launch(); err != nil {
+		log.Fatalln(err)
+	} else if output.browser.page, err = output.browser.browser.NewPage(); err != nil {
+		log.Fatalln(err)
+	}
+
+	return output
+}
+
+func (hs *Service) Close() error {
+	if err := hs.browser.page.Close(); err != nil {
+		log.Println("page close error")
+		return err
+	} else if err = hs.browser.browser.Close(); err != nil {
+		log.Println("browser close error")
+		return err
+	}
+	return nil
+}
+
+func (hs *Service) Reset() error {
+	if err := hs.Close(); err != nil {
+		return err
+	} else if hs.browser.browser, err = hs.browser.browserType.Launch(); err != nil {
+		log.Println("browser launch error")
+		return err
+	} else if hs.browser.page, err = hs.browser.browser.NewPage(); err != nil {
+		log.Println("browser new page error")
+		return err
+	}
+	hs.count = 0
+	return nil
+}
+
 func (hs Service) FetchOne(ctx context.Context, bp hourse.ParserService) ([]hourse.UpsertHourseRequest, error) {
 	var err error
 	var items []pw.ElementHandle
@@ -40,13 +85,13 @@ func (hs Service) FetchOne(ctx context.Context, bp hourse.ParserService) ([]hour
 
 	log.Printf("Current URL: %s\n", bp.URL())
 
-	if _, err = hs.page.Goto(bp.URL()); err != nil {
+	if _, err = hs.browser.page.Goto(bp.URL()); err != nil {
 		return nil, err
-	} else if err = bp.SetTotalRow(ctx, hs.page); err != nil {
+	} else if err = bp.SetTotalRow(ctx, hs.browser.page); err != nil {
 		return nil, err
-	} else if _, err = hs.page.WaitForSelector(qs); err != nil {
+	} else if _, err = hs.browser.page.WaitForSelector(qs); err != nil {
 		return nil, err
-	} else if items, err = hs.page.QuerySelectorAll(qs); err != nil {
+	} else if items, err = hs.browser.page.QuerySelectorAll(qs); err != nil {
 		return nil, err
 	}
 
@@ -104,10 +149,15 @@ func (hs Service) Upsert(ctx context.Context, in hourse.UpsertHourseRequest) err
 	return nil
 }
 
-func (hs Service) FetchAll(ctx context.Context, bp hourse.ParserService) error {
+func (hs *Service) FetchAll(ctx context.Context, bp hourse.ParserService) error {
 	if !bp.HasNext() {
 		return nil
 	}
+
+	if hs.count == hs.resetCount {
+		hs.Reset()
+	}
+	hs.count++
 
 	response, err := hs.FetchOne(ctx, bp)
 	if err != nil {
@@ -119,7 +169,8 @@ func (hs Service) FetchAll(ctx context.Context, bp hourse.ParserService) error {
 	}
 
 	bp.UpdateCurrentPage()
-	time.Sleep(time.Second * 5)
+	rand.Seed(time.Now().UnixNano())
+	time.Sleep(time.Second * time.Duration(rand.Intn(5)+5))
 
 	select {
 	case <-ctx.Done():

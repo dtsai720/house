@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"path"
 	"strconv"
 	"strings"
 
@@ -13,7 +12,6 @@ import (
 	pw "github.com/playwright-community/playwright-go"
 )
 
-// https://buy.yungching.com.tw/region/台北市-_c/1000-3000_price/_rm/?pg=2
 type ParseYungChing struct {
 	PageSize    int
 	CurrentPage int
@@ -50,16 +48,16 @@ func NewParseYungChing(city string) hourse.ParserService {
 }
 
 func (yc ParseYungChing) URL() string {
-	return path.Join(
+	return strings.Join([]string{
 		"https://buy.yungching.com.tw/region",
 		fmt.Sprintf("%s-_c", yc.City),
 		fmt.Sprintf("%d-%d_price", yc.MinPrice, yc.MaxPrice),
 		fmt.Sprintf("_rm/?pg=%d", yc.CurrentPage),
-	)
+	}, "/")
 }
 
 func (yc ParseYungChing) HasNext() bool {
-	return yc.TotalPage == -1 || yc.CurrentPage < yc.TotalPage
+	return yc.TotalPage == -1 || yc.CurrentPage <= yc.TotalPage
 }
 
 func (yc ParseYungChing) ItemQuerySelector() string {
