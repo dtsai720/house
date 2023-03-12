@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Directions</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <script src="/js/jquery.min.js"></script>
+    <script src="/lib/jquery-ui/jquery-ui.min.js"></script>
+</head>
+<body>
+                
+<div id="divGuide">
+        <div class="warningMark">This project is not yet published  if you start testing all data will not be saved.</div>
+    <div class="test-guide">
+        <h1 class="title">Winfitts</h1>
+        <div class="directions">
+            <p>
+                Move the cursor by your fingers to select the red dot. Repeat this task until no more red dot shown on screen. This test usually takes about 2~5 minutes to finish.
+                Please move the cursor and click the dot based on your normal speed.
+                Click Start to start this test.
+            </p>
+        </div>
+        <div class="text-align-right">
+            <button type="button" class="button-2" id="btnStart">Start</button>
+        </div>
+    </div>
+</div>
+
+<div id="divWinfittsTest" class="winfitts-test2" style="display:none;">
+    <div class="rotateBox">
+        <div class="dotBox">
+            <div class="target dot"></div>
+        </div>
+    </div>
+    <div class="start dot"></div>
+</div>
+
+<input name="__RequestVerificationToken" type="hidden" value="CfDJ8F1grkxLJNFHgn9PkjUtBjKvRoh3MkVmXBvxh-DihBud0QKd7RMZGD3QSovXIwC9F4cNN3IDxGV0APbXoHCw5tbmhtHSPDoAVrk3B21EvLq5RWzwa9fbSaBN-rlNxC20Gt5aVLidP46qcFt-M_mv8RzPUffKbGVE1hSGtenbZ0m40ToEWY42o5HhfykVWUUglA" />
+
+<script>
+
+    let winfittsStartWidth = 18;
+    let IsTestData = new Array();
+    let winfittsJsonData = '[{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":30,"StartWidth":18,"TargetWidth":56,"Distance":110,"StartX":1116,"StartY":424,"Deviation":1,"Rotate":90,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":1.6,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":30,"StartWidth":18,"TargetWidth":12,"Distance":110,"StartX":69,"StartY":707,"Deviation":1,"Rotate":45,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":150,"StartWidth":18,"TargetWidth":56,"Distance":548,"StartX":41,"StartY":94,"Deviation":1,"Rotate":315,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":150,"StartWidth":18,"TargetWidth":56,"Distance":548,"StartX":101,"StartY":1003,"Deviation":1,"Rotate":45,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":30,"StartWidth":18,"TargetWidth":12,"Distance":110,"StartX":400,"StartY":529,"Deviation":1,"Rotate":315,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":30,"StartWidth":18,"TargetWidth":12,"Distance":110,"StartX":946,"StartY":958,"Deviation":1,"Rotate":0,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":30,"StartWidth":18,"TargetWidth":56,"Distance":110,"StartX":754,"StartY":285,"Deviation":1,"Rotate":270,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":1.6,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":150,"StartWidth":18,"TargetWidth":12,"Distance":548,"StartX":840,"StartY":621,"Deviation":1,"Rotate":315,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":5.7,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":30,"StartWidth":18,"TargetWidth":12,"Distance":110,"StartX":235,"StartY":412,"Deviation":1,"Rotate":180,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":150,"StartWidth":18,"TargetWidth":56,"Distance":548,"StartX":525,"StartY":995,"Deviation":1,"Rotate":90,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":30,"StartWidth":18,"TargetWidth":56,"Distance":110,"StartX":1141,"StartY":441,"Deviation":1,"Rotate":225,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":1.6,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":150,"StartWidth":18,"TargetWidth":12,"Distance":548,"StartX":877,"StartY":362,"Deviation":1,"Rotate":270,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":5.7,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":150,"StartWidth":18,"TargetWidth":12,"Distance":548,"StartX":721,"StartY":576,"Deviation":1,"Rotate":135,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":5.7,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":30,"StartWidth":18,"TargetWidth":12,"Distance":110,"StartX":1094,"StartY":608,"Deviation":1,"Rotate":225,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":150,"StartWidth":18,"TargetWidth":56,"Distance":548,"StartX":1227,"StartY":119,"Deviation":1,"Rotate":270,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":30,"StartWidth":18,"TargetWidth":56,"Distance":110,"StartX":972,"StartY":427,"Deviation":1,"Rotate":0,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":1.6,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":150,"StartWidth":18,"TargetWidth":12,"Distance":548,"StartX":528,"StartY":1021,"Deviation":1,"Rotate":0,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":5.7,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":30,"StartWidth":18,"TargetWidth":12,"Distance":110,"StartX":195,"StartY":246,"Deviation":1,"Rotate":90,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":30,"StartWidth":18,"TargetWidth":12,"Distance":110,"StartX":141,"StartY":915,"Deviation":1,"Rotate":135,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":30,"StartWidth":18,"TargetWidth":56,"Distance":110,"StartX":1230,"StartY":771,"Deviation":1,"Rotate":180,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":1.6,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":150,"StartWidth":18,"TargetWidth":56,"Distance":548,"StartX":761,"StartY":449,"Deviation":1,"Rotate":225,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":150,"StartWidth":18,"TargetWidth":12,"Distance":548,"StartX":769,"StartY":412,"Deviation":1,"Rotate":225,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":5.7,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":30,"StartWidth":18,"TargetWidth":56,"Distance":110,"StartX":832,"StartY":472,"Deviation":1,"Rotate":45,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":1.6,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":150,"StartWidth":18,"TargetWidth":56,"Distance":548,"StartX":1231,"StartY":515,"Deviation":1,"Rotate":180,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":150,"StartWidth":18,"TargetWidth":12,"Distance":548,"StartX":394,"StartY":821,"Deviation":1,"Rotate":45,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":5.7,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":150,"StartWidth":18,"TargetWidth":56,"Distance":548,"StartX":605,"StartY":742,"Deviation":1,"Rotate":0,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":30,"StartWidth":18,"TargetWidth":56,"Distance":110,"StartX":351,"StartY":271,"Deviation":1,"Rotate":135,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":1.6,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":150,"StartWidth":18,"TargetWidth":12,"Distance":548,"StartX":617,"StartY":124,"Deviation":1,"Rotate":180,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":5.7,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":150,"StartWidth":18,"TargetWidth":12,"Distance":548,"StartX":188,"StartY":611,"Deviation":1,"Rotate":90,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":5.7,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":30,"StartWidth":18,"TargetWidth":56,"Distance":110,"StartX":424,"StartY":884,"Deviation":1,"Rotate":315,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":1.6,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":15,"DistanceBymm":150,"StartWidth":18,"TargetWidth":56,"Distance":548,"StartX":1114,"StartY":460,"Deviation":1,"Rotate":135,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null},{"StartWidthBymm":5,"TargetWidthBymm":3,"DistanceBymm":30,"StartWidth":18,"TargetWidth":12,"Distance":110,"StartX":288,"StartY":411,"Deviation":1,"Rotate":270,"SystemTime":0,"SystemActionTime":0,"Sort":0,"Difficulty":3.5,"Actions":null}]';
+    let practiceWinfittsJsonData = '[]';
+    let winfitts = JSON.parse(winfittsJsonData);
+    let practiceWinfitts = JSON.parse(practiceWinfittsJsonData);
+    let OthersEvent = false;
+    let isPractice = false;
+
+    $(function () {
+
+        let systemStart = undefined;
+        let syatemActionStart = undefined;
+        let isStart = false;
+
+        $("#btnStart").click(function () {
+            document.fullscreenEnabled = document.fullscreenEnabled || 
+                document.mozFullScreenEnabled || 
+                document.documentElement.webkitRequestFullScreen;
+
+            if (document.fullscreenEnabled) {
+                requestFullscreen(document.documentElement);
+            }
+
+            $("#divGuide").hide();
+            $("#divWinfittsTest").show();
+
+            if (isPractice) {
+                let w = practiceWinfitts.shift();
+                CreateWinfitts(w);
+            }
+            else {
+                let w = winfitts.shift();
+                CreateWinfitts(w);
+            }
+        });
+
+        $("#btnTestStart").click(function () {
+            $("div[data-modal='practiceSuccess']").removeClass("show");
+            let w = winfitts.shift();
+            CreateWinfitts(w);
+        });
+
+        $('html').click(function (e) {
+
+            if (e.target.id == 'btnStart') {
+                OthersEvent = true;
+                return;
+            }
+
+            if (!OthersEvent) {
+                return;
+            }
+
+            if ($(e.target).parent('.dot').hasClass('start')) {
+                if (syatemActionStart == undefined) {
+                    syatemActionStart = Date.now();
+                    isStart = true;
+                }
+
+                $("#divWinfittsTest")[0].Winfitts.Actions.push(CreateAction('Click', e.pageX, e.pageY, 'Start', $("#divWinfittsTest")[0].Winfitts.Actions.length));
+
+                $("#divWinfittsTest .start").removeClass('light');
+                $('#divWinfittsTest .target').addClass('light')
+            }
+            else if ($(e.target).parent('.dot').hasClass('target')) {
+
+                $("#divWinfittsTest .start").addClass('light');
+                $('#divWinfittsTest .target').removeClass('light')
+
+                $("#divWinfittsTest")[0].Winfitts.Actions.push(CreateAction('Click', e.pageX, e.pageY, 'Target', $("#divWinfittsTest")[0].Winfitts.Actions.length));
+
+                if (isStart) {
+
+                    var divWinfittsTest = $("#divWinfittsTest");
+
+                    isStart = false;
+                    divWinfittsTest[0].Winfitts.SystemTime = Date.now() - systemStart;
+                    divWinfittsTest[0].Winfitts.SystemActionTime = Date.now() - syatemActionStart;
+                    systemStart = undefined;
+                    syatemActionStart = undefined;
+
+                    if (isPractice) {
+                        if (practiceWinfitts.length > 0) {
+                            let w = practiceWinfitts.shift();
+                            CreateWinfitts(w);
+                        }
+                        else {
+                            $("div[data-modal='practiceSuccess']").addClass("show");
+                            isPractice = false;
+                        }
+                    }
+                    else {
+                        IsTestData.push(divWinfittsTest[0].Winfitts);
+
+                        if (winfitts.length > 0) {
+                            let w = winfitts.shift();
+                            CreateWinfitts(w);
+                        }
+                        else {
+                            $("div[data-modal='Finish']").addClass("show");
+                            $("#divWinfittsTest").hide();
+                        }
+                    }
+                }
+            }
+            else {
+                $("#divWinfittsTest")[0].Winfitts.Actions.push(CreateAction('Click', e.pageX, e.pageY, 'Others', $("#divWinfittsTest")[0].Winfitts.Actions.length));
+            }
+        });
+
+        $("#btnFinish").click(function () {
+
+            $(this).hide();
+            $("#btnFinishLoading").show();
+
+            let task = {
+                'TaskId': '2a792b17b6a64fca9d757f906639d695',
+                'Winfitts': new Array()
+            };
+
+            for (var i = 0; i < IsTestData.length; i++) {
+                IsTestData[i].Sort = i;
+                task.Winfitts.push(IsTestData[i]);
+            }
+
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: '/Home/Winfitts',
+                data: task,
+                headers: {
+                    'RequestVerificationToken': $('[name=__RequestVerificationToken]').val()
+                },
+                dataType: 'json',
+                success: function (result) {
+                    if (result.success) {
+                        location.href = location.href;
+                    }
+                    else {
+                        $("#divFinishError").text(result.message).show();
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    $("#btnFinish").show();
+                    $("#divFinishError").show();
+                    $("#btnFinishLoading").hide();
+                }
+            });
+
+        });
+    });
+
+    function requestFullscreen(element) {
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+        } else if (element.webkitRequestFullScreen) {
+            element.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+        }
+    }
+
+    function CreateAction(actionType, x, y, postionType, sort) {
+        return {
+            'ActionType': actionType,
+            'X': x,
+            'Y': y,
+            'PostionType': postionType,
+            'Sort': sort
+        };
+    }
+
+    function CreateWinfitts(w) {
+        w.Actions = new Array();
+        $("#divWinfittsTest")[0].Winfitts = w;
+        // 新增點設定
+        let test = new Dot({
+            x: w.StartX,
+            y: w.StartY,
+            distance: w.Distance,
+            startSize: w.StartWidth,
+            targetSize: w.TargetWidth,
+            deviation: 1,
+            rotate: w.Rotate * -1});
+        // 設定測驗場景
+        test.setTestDot();
+        systemStart = Date.now();
+    }
+
+    class Dot {
+        // ( x:start.X座標, y:start.Y座標, distance:start與target之間的距離 , startSize:start的size(建議為偶數) ,targetSize:target的size(建議為偶數) , rotate:旋轉的角度,右邊0度順時針為正)
+        constructor({ x, y, distance, startSize, targetSize, deviation, rotate }) {
+            this.x = x,
+                this.y = y,
+                this.distance = distance,
+                this.startSize = startSize,
+                this.targetSize = targetSize,
+                this.deviation = deviation,
+                this.rotate = rotate
+        }
+        setTestDot() {
+            let rotateBox = $('.rotateBox');
+            let dotBox = $('.dotBox');
+            let start = $('.start');
+            let target = $('.target');
+
+            // 測驗的位置 + 旋轉角度(右邊0度順時針為正)
+            rotateBox.css("left", this.x).css("top", this.y).css("transform", "rotate(" + this.rotate + "deg)");
+            // start 與 target 的距離
+            dotBox.css("width", this.distance);
+            // 設定 start 位置&尺寸
+            start.css("left", this.x).css("top", this.y);
+            start.css("width", this.startSize).css("height", this.startSize);
+            start.addClass('light');
+            // 設定 target 尺寸&修正旋轉為正
+            target.css("width", this.targetSize).css("height", this.targetSize);
+            target.css("transform", "translate(-50% , -50%) rotate(" + (-this.rotate) + "deg)");
+            // 新增 dot 判定範圍 span ,尺寸為父層扣除 distance 值
+            start.empty().append($('<span/>').css("width", start.width() - this.deviation).css("height", start.width() - this.deviation));
+            target.empty().append($('<span/>').css("width", target.width() - this.deviation).css("height", target.width() - this.deviation));
+
+            // 取回 target 中心點位置 (x,y)
+            console.log("target(x,y)", target.offset().left + target.width() / 2, target.offset().top + target.width() / 2);
+
+            target.removeClass('mark-reverse');
+            start.removeClass('mark-reverse');
+
+            if (target.offset().top <= 30) {
+                target.addClass('mark-reverse');
+            }           
+
+            if (start.offset().top <= 30) {
+                start.addClass('mark-reverse');
+            }
+        }
+    };
+</script></partial>
+        <div class="modal" data-modal="practiceSuccess">
+            <div class="modal-box">
+                <div class="modal-body">
+                    <div class="title"></div>
+                    <div class="info">The end of the practice, please click the button below to enter the formal test.</div>
+                </div>
+                <div class="modal-foot">
+                    <button type="button" class="button-1" id="btnTestStart">Test starts</button>
+                </div>
+            </div>
+        </div>
+        <div class="modal" data-modal="Finish">
+            <div class="modal-box">
+                <div class="modal-body">
+                    <div class="title"></div>
+                    <div class="info">The task is done, please click the Finish button.</div>
+                    <div id="divFinishError" class="setting-warning" style="display:none;">Please click below again to resend.</div>
+                </div>
+                <div class="modal-foot">
+                    <button type="button" class="button-1" id="btnFinish">Finish</button>
+                    <a class="button-1 upload-loading" id="btnFinishLoading" style="display:none;">&nbsp;</a>
+                </div>
+            </div>
+        </div>
+</body>
+</html>

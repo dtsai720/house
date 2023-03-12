@@ -45,7 +45,7 @@ func NewParseSale(regionID int) hourse.ParserService {
 	output.Host = *host
 	output.PageSize = 30
 	output.MaxPrice = 3000
-	output.MinPrice = 500
+	output.MinPrice = 1000
 	output.RegionID = regionID
 	output.TotalPage = -1
 	output.CurrentPage = 0

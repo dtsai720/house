@@ -36,7 +36,7 @@ func NewParseYungChing(city string) hourse.ParserService {
 	yc.TotalPage = -1
 	yc.City = city
 	yc.MaxPrice = 3000
-	yc.MinPrice = 500
+	yc.MinPrice = 1000
 
 	yc.Selectors.ListItem = QuerySelector{ClassName: []string{"m-list-item"}, TagName: "li"}
 	yc.Selectors.Link = QuerySelector{ClassName: []string{"item-img", "ga_click_trace"}, TagName: "a"}

@@ -61,9 +61,15 @@ type ParserService interface {
 type Postgres interface {
 	Upsert(ctx context.Context, in UpsertHourseRequest) error
 	Get(ctx context.Context, in GetHoursesRequest) (int64, []GetHoursesResponse, error)
+	ListCities(ctx context.Context) ([]string, error)
+	ListSectionByCity(ctx context.Context, name string) ([]string, error)
+	ListShape(ctx context.Context) ([]string, error)
 }
 
 type Service interface {
 	Upsert(ctx context.Context, in UpsertHourseRequest) error
 	Get(ctx context.Context, in GetHoursesRequest) (int64, []GetHoursesResponse, error)
+	ListCities(ctx context.Context) ([]string, error)
+	ListSectionByCity(ctx context.Context, name string) ([]string, error)
+	ListShape(ctx context.Context) ([]string, error)
 }

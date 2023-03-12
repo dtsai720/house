@@ -37,7 +37,7 @@ func NewParseSinYi(city string) hourse.ParserService {
 	sy.TotalPage = -1
 	sy.City = city
 	sy.MaxPrice = 3000
-	sy.MinPrice = 500
+	sy.MinPrice = 1000
 
 	sy.Selectors.Total = QuerySelector{ClassName: []string{"pageLinkClassName"}, TagName: "a"}
 	sy.Selectors.ListItem = QuerySelector{ClassName: []string{"buy-list-item"}, TagName: "div"}

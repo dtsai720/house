@@ -53,12 +53,20 @@ func ChromiumEvent(ctx context.Context, pw *playwright.Playwright) {
 }
 
 func main() {
+	// if err := playwright.Install(); err != nil {
+	// 	log.Fatalln(err)
+	// }
 	pw, err := playwright.Run()
 	if err != nil {
 		log.Fatalf("could not start playwright: %v", err)
 	}
 
 	defer pw.Stop()
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go FirefoxEvent(ctx, pw)
+	go ChromiumEvent(ctx, pw)
 
 	conn, err := sql.Open("postgres", fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
@@ -77,16 +85,11 @@ func main() {
 	srv.Addr = ":8000"
 	srv.Handler = hrhttp.NewServer(chi.NewMux(), hourse.NewService(db))
 
-	ctx, cancel := context.WithCancel(context.Background())
-
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalln(err)
 		}
 	}()
-
-	go FirefoxEvent(ctx, pw)
-	go ChromiumEvent(ctx, pw)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

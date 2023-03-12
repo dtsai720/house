@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+<script>
+    const URL = 'http://192.168.252.128:8000';
+    const PATH = 'hourse';
+    const Default = {city: '台北市', max_price: 2250, min_main_area: 20};
+    const HEADERS = {'Content-Type': 'application/json'};
+    const checkedItems = (selector) => {
+        const item = document.querySelectorAll(selector);
+        const items = [];
+        item.forEach((element) => {
+            items.push(element.value);
+        });
+        return items;
+    };
+    const setResponse = (params) => {
+        const queryParams = new URLSearchParams(params);
+        fetch(`${URL}/${PATH}?${queryParams.toString()}`).then(resp => resp.json())
+        .then(emements => {
+            const content = [`<tr>
+                <th style="text-align: left; width: calc(100%/12*4);">location</th>
+                <th style="text-align: left; width: calc(100%/12);">age</th>
+                <th style="text-align: left; width: calc(100%/12);">price</th>
+                <th style="text-align: left; width: calc(100%/12);">area</th>
+                <th style="text-align: left; width: calc(100%/12);">main_area</th>
+                <th style="text-align: left; width: calc(100%/12);">shape</th>
+                <th style="text-align: left; width: calc(100%/12);">floor</th>
+                <th style="text-align: left; width: calc(100%/12);">link</th>
+            </tr>`];
+            emements.forEach(element => {
+                content.push(`<tr>
+                    <td style="text-align: left; width: calc(100%/12*4);"><a href=https://www.google.com/maps/place/${element.location}>${element.location}</a></td>
+                    <td style="text-align: left; width: calc(100%/12);">${element.age}</td>
+                    <td style="text-align: left; width: calc(100%/12);">${Math.trunc(element.price)}</td>
+                    <td style="text-align: left; width: calc(100%/12);">${element.area}</td>
+                    <td style="text-align: left; width: calc(100%/12);">${element.main_area}</td>
+                    <td style="text-align: left; width: calc(100%/12);">${element.shape}</td>
+                    <td style="text-align: left; width: calc(100%/12);">${element.floor}</td>
+                    <td style="text-align: left; width: calc(100%/12);"><a href=${element.link}>Link</a></td>
+                </tr>`);
+            })
+
+            document.querySelector('div[class=content]').innerHTML = `<table>${content.join('')}</table>`
+        }).catch(error => {
+            console.error('Error:', error)
+        })
+
+    }
+
+    window.onload = () => {
+        document.getElementById('submit').addEventListener('click', () => {
+            const city = document.getElementById('city').value;
+            const section = checkedItems('input[name=section]:checked');
+            const shape = checkedItems('input[name=shape]:checked');
+            const max_price = document.getElementById('price').value || 2250;
+            const min_main_area = document.getElementById('main_area').value || 20;
+            const age = document.getElementById('age').value || null;
+            setResponse({city, max_price, min_main_area, section, shape, age});
+        })
+
+        fetch(`${URL}/city`).then(resp => resp.json()).then(elements => {
+            const content = []
+            elements.forEach(element => {
+                content.push(`<option value="${element}">${element}</option>`)
+            })
+            document.querySelector('.city').innerHTML = `<label for="city">Select a City:</label>
+            <select id="city" name="city">${content.join('')}</select>`
+            const listSection = (city) => {
+                fetch(`${URL}/section?city=${city}`).then(resp => resp.json()).then(elements => {
+                    const section = [`<label for="section">Select Section:</label>`];
+                    for (let i = 0; i < elements.length; i++) {
+                        const element = elements[i];
+                        if (i %6 == 0) {
+                            section.push(`<div style="display: inline-block">`)
+                        }
+                        section.push(`<label><input type="checkbox" id="${city}" name="section" value="${element}">${element}</label>`)
+                        if (i % 6 == 5) {
+                            section.push('</div>')
+                        }
+                    }
+                    document.querySelector('.section').innerHTML = section.join('');
+                })
+            }
+            listSection('台北市');
+            document.getElementById('city').addEventListener('change', () => {
+                const city = document.getElementById('city').value;
+                listSection(city);
+            })
+        }).catch(error => {
+            console.error("error: ", error)
+        })
+
+        fetch(`${URL}/shape`).then(resp => resp.json()).then(elements => {
+            const shape = [`<label for="shape">Select Shape:</label>`];
+            for (let i = 0; i < elements.length; i++) {
+                const element = elements[i];
+                if (i %6 == 0) {
+                    shape.push(`<div style="display: inline-block">`)
+                }
+                shape.push(`<label><input type=checkbox name=shape value="${element}">${element}</label>`)
+                if (i % 6 == 5) {
+                    shape.push('</div>')
+                }
+            }
+            document.querySelector('.shape').innerHTML = shape.join('');
+        })
+
+        setResponse(Default);
+    }
+</script>
+</head>
+<body style="width: 80%; margin: auto;">
+    <div class="city"></div>
+    <div class="section"></div>
+    <div class="shape"></div>
+    <label for="price">Price:</label>
+    <input type="price" id="price" name="price">
+    <label for="main_area">MainArea:</label>
+    <input type="main_area" id="main_area" name="main_area">
+    <label for="age">Age:</label>
+    <input type="age" id="age" name="age">
+    <input type="submit" value="Submit" id="submit">
+    <div class="content"></div>
+</body>
+</html>

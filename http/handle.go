@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/hourse"
 )
@@ -68,8 +69,65 @@ func (s *Server) HandleGetMulti() http.HandlerFunc {
 	}
 }
 
-func (s *Server) HandleGet() http.HandlerFunc {
+func (s *Server) HandleListCities() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		body, err := s.service.ListCities(r.Context())
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 
+		resp, err := json.Marshal(body)
+		if err != nil {
+			log.Printf("error when marshal: %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(resp)
+	}
+}
+
+func (s *Server) HandleListSection() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		param := r.URL.Query()
+		name := strings.TrimSpace(param.Get("city"))
+
+		body, err := s.service.ListSectionByCity(r.Context(), name)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		resp, err := json.Marshal(body)
+		if err != nil {
+			log.Printf("error when marshal: %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(resp)
+	}
+}
+
+func (s *Server) HandleListShape() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		body, err := s.service.ListShape(r.Context())
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		resp, err := json.Marshal(body)
+		if err != nil {
+			log.Printf("error when marshal: %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(resp)
 	}
 }

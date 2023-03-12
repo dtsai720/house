@@ -18,10 +18,15 @@ type Queries interface {
 	InsertSection(ctx context.Context, arg sqlc.InsertSectionParams) (sqlc.Section, error)
 	InsertCity(ctx context.Context, name string) (sqlc.City, error)
 	InsertShape(ctx context.Context, name string) (sqlc.Shape, error)
+
 	GetHourses(ctx context.Context, arg sqlc.GetHoursesParams) ([]sqlc.GetHoursesRow, error)
 	GetShape(ctx context.Context, name string) (sqlc.Shape, error)
 	GetSection(ctx context.Context, name string) (sqlc.Section, error)
 	GetCity(ctx context.Context, name string) (sqlc.City, error)
+
+	ListCities(ctx context.Context) ([]string, error)
+	ListSectionByCity(ctx context.Context, name string) ([]string, error)
+	ListShape(ctx context.Context) ([]string, error)
 }
 
 type HourseRepository struct {
@@ -38,6 +43,18 @@ func NewPostgres(db *sql.DB) hourse.Postgres {
 
 func (hr HourseRepository) NewQueries(db sqlc.DBTX) Queries {
 	return sqlc.New(db)
+}
+
+func (hr HourseRepository) ListCities(ctx context.Context) ([]string, error) {
+	return hr.queries.ListCities(ctx)
+}
+
+func (hr HourseRepository) ListSectionByCity(ctx context.Context, name string) ([]string, error) {
+	return hr.queries.ListSectionByCity(ctx, name)
+}
+
+func (hr HourseRepository) ListShape(ctx context.Context) ([]string, error) {
+	return hr.queries.ListShape(ctx)
 }
 
 func (hr HourseRepository) Get(ctx context.Context, in hourse.GetHoursesRequest) (int64, []hourse.GetHoursesResponse, error) {
