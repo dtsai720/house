@@ -24,28 +24,44 @@ func FirefoxEvent(ctx context.Context, pw *playwright.Playwright) {
 	service := parser.NewService(pw.Firefox)
 	defer service.Close()
 
-	for _, city := range []string{"Taipei", "NewTaipei"} {
-		item := parser.NewParseSinYi(city)
-		service.FetchAll(ctx, item)
+	candidates := []hourse.ParserService{
+		parser.NewParseSinYi("Taipei"),
+		parser.NewParseYungChing("台北市"),
+		parser.NewParseSinYi("NewTaipei"),
+		parser.NewParseYungChing("新北市"),
+		parser.NewParseSinYi("Hsinchu-city"),
+		parser.NewParseYungChing("桃園市"),
+		parser.NewParseSinYi("Hsinchu-county"),
+		parser.NewParseYungChing("高雄市"),
+		parser.NewParseSinYi("Taoyuan-city"),
+		parser.NewParseYungChing("新竹縣"),
+		parser.NewParseSinYi("Kaohsiung-city"),
+		parser.NewParseYungChing("新竹市"),
+		parser.NewParseYungChing("台南市"),
+		parser.NewParseYungChing("屏東縣"),
 	}
 
-	cities := []string{"台北市", "新北市", "桃園市", "高雄市", "新竹縣", "新竹市", "台南市", "屏東縣"}
-	for _, city := range cities {
-		item := parser.NewParseYungChing(city)
-		service.FetchAll(ctx, item)
+	for i := 0; i < len(candidates); i++ {
+		service.FetchAll(ctx, candidates[i])
 	}
 
-	for _, city := range []string{"Hsinchu-city", "Hsinchu-county", "Taoyuan-city", "Kaohsiung-city"} {
-		item := parser.NewParseSinYi(city)
-		service.FetchAll(ctx, item)
-	}
+	// cities := []string{"台北市", "新北市", "桃園市", "高雄市", "新竹縣", "新竹市", "台南市", "屏東縣"}
+	// for _, city := range cities {
+	// 	item := parser.NewParseYungChing(city)
+	// 	service.FetchAll(ctx, item)
+	// }
+
+	// for _, city := range []string{"Hsinchu-city", "Hsinchu-county", "Taoyuan-city", "Kaohsiung-city"} {
+	// 	item := parser.NewParseSinYi(city)
+	// 	service.FetchAll(ctx, item)
+	// }
 }
 
 func ChromiumEvent(ctx context.Context, pw *playwright.Playwright) {
 	service := parser.NewService(pw.Chromium)
 	defer service.Close()
 
-	regions := []int{1, 3}
+	regions := []int{1, 3, 4, 5, 6}
 	for _, num := range regions {
 		item := parser.NewParseSale(num)
 		service.FetchAll(ctx, item)

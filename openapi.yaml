@@ -1,0 +1,107 @@
+openapi: "3.0.3"
+info:
+  title: Simple API overview
+  version: 1.0.0
+  description: A simple API to operate hourse
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+paths:
+  /hourse/{id}:
+    get:
+      description: return a hourse
+      tags:
+        - Hourse
+      parameters:
+        - in: header
+          name: x-user-id
+          required: true
+          schema:
+            $ref: "#/components/headers/x-user-id"
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HourseResponse"
+  /hourse:
+    get:
+      description: return a list of hourse
+      parameters:
+        - in: header
+          name: x-user-id
+          required: true
+          schema:
+            $ref: "#/components/headers/x-user-id"
+        - name: limit
+          in: query
+          description: Limits the number of items
+          schema:
+            type: integer
+        - in: header
+          name: AuthToken
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HourseResponse"
+      tags:
+        - Hourse
+    put:
+      description: upsert data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HourseRequest"
+      responses:
+        "204":
+          description: Success
+      tags:
+        - Internal
+
+security:
+  - AuthToken: []
+
+components:
+  securitySchemes:
+    AuthToken:
+      type: http
+      scheme: bearer
+
+  schemas:
+    HourseResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: id
+        shape:
+          type: string
+          description: shape
+    HourseRequest:
+      type: object
+      properties:
+        name:
+          type: string
+  headers:
+    x-user-id:
+      schema:
+        type: string
+      required: true
+      example: "abcdef"

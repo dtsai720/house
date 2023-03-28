@@ -1,0 +1,173 @@
+@startuml
+
+left to right direction
+skinparam roundcorner 5
+skinparam linetype ortho
+skinparam shadowing false
+skinparam handwritten false
+
+!define primary_key(x) <b><color:#b8861b><&key></color> x</b>
+!define foreign_key(x) <color:#aaaaaa><&key></color> x
+!define unique_key(x) <color:#000000><&key></color> x
+!define column(x) <color:#efefef><&media-record></color> x
+!define table(x) entity x << (T, white) >>
+!define unique_key(x) <color:#000000><&key></color> x
+
+table( group ) {
+    column( id ): bigserial
+    column( name ): varchar
+    column( premission ): varchar
+    <color:#b8861b><&key></color> PRIMARY(id)
+    <color:red><&key></color> UNIQUE(name)
+}
+
+table( user ) {
+    column( id ): bigserial
+    column( name ): varchar
+    column( email ): varchar
+    column( password ): varchar
+    column( active ): boolean
+    column( group_id ): bigint
+
+    <color:#b8861b><&key></color> PRIMARY(id)
+    <color:red><&key></color> UNIQUE(email)
+    <color:#aaaaaa><&key></color> FOREIGN(group_id)
+}
+
+table( project ) {
+    column( id ): bigserial
+    column( universal_id ): uuid
+    column( name ): varchar
+    column( orders ): varchar array
+    column( created_by ): bigint
+    column( created_at ): timestamp
+    column( updated_at ): timestamp
+    column( typing_text_id ): bigint
+
+    <color:#b8861b><&key></color> PRIMARY(id)
+    <color:red><&key></color> UNIQUE(universal_id)
+    <color:#aaaaaa><&key></color> FOREIGN(created_by)
+    <color:#aaaaaa><&key></color> FOREIGN(typing_text_id)
+}
+
+table( model ) {
+    column( id ): bigserial
+    column( name ): varchar
+    column( universal_id ): uuid
+    column( project_id ): bigint
+    column( created_by ): varchar
+    column( created_at ): timestamp
+    column( updated_at ): timestamp
+
+    <color:#b8861b><&key></color> PRIMARY(id)
+    <color:red><&key></color> UNIQUE(project_id, name)
+    <color:red><&key></color> UNIQUE(universal_id)
+    <color:#aaaaaa><&key></color> FOREIGN(project_id)
+}
+
+table( participant ) {
+    column( id ): bigserial
+    column( name ): varchar
+    column( universal_id ): uuid
+    column( project_id ): bigint
+    column( created_at ): timestamp
+    column( updated_at ): timestamp
+
+    <color:#b8861b><&key></color> PRIMARY(id)
+    <color:red><&key></color> UNIQUE(project_id, name)
+    <color:red><&key></color> UNIQUE(universal_id)
+    <color:#aaaaaa><&key></color> FOREIGN(project_id)
+}
+
+table( winfits_setting ) {
+    column( id ): bigserial
+    column( factor ): decimal
+    column( model_id ): bigint
+    column( universal_id ): uuid
+    column( created_at ): timestamp
+    column( updated_at ): timestamp
+
+    <color:#b8861b><&key></color> PRIMARY(id)
+    <color:red><&key></color> UNIQUE(universal_id)
+    <color:#aaaaaa><&key></color> FOREIGN(model_id)
+}
+
+table( winfits_round ) {
+    column( id ): bigserial
+    column( winfits_setting_id ): bigint
+    column( participant_id ): decimal
+    column( round ): integer
+    column( start ): integer array
+    column( target ): integer array
+    column( created_at ): timestamp
+    column( updated_at ): timestamp
+
+    <color:#b8861b><&key></color> PRIMARY(id)
+    <color:#aaaaaa><&key></color> FOREIGN(participant_id)
+    <color:#aaaaaa><&key></color> FOREIGN(winfits_setting_id)
+    <color:red><&key></color> UNIQUE(winfits_setting_id, participant_id, round)
+}
+
+table( winfits_result ) {
+    column( id ): bigserial
+    column( winfits_round_id ): bigint
+    column( position ): integer array
+    column( event_time ): timestamp
+    column( event_type ): varchar
+
+    <color:#b8861b><&key></color> PRIMARY(id)
+    <color:#aaaaaa><&key></color> FOREIGN(winfits_round_id)
+}
+
+table( drag_and_drop ) {
+    column( id ): bigserial
+    column( model_id ): bigint
+    column( participant_id ): decimal
+    column( event_time ): timestamp
+    column( event_type ): varchar
+
+    <color:#b8861b><&key></color> PRIMARY(id)
+    <color:#aaaaaa><&key></color> FOREIGN(model_id)
+    <color:#aaaaaa><&key></color> FOREIGN(participant_id)
+}
+
+table( typing_text ) {
+    column( id ): bigserial
+    column( name ): varchar
+    column( text ): varchar
+
+    <color:#b8861b><&key></color> PRIMARY(id)
+    <color:red><&key></color> UNIQUE(name)
+}
+
+
+table( typing ) {
+    column( id ): bigserial
+    column( model_id ): bigint
+    column( participant_id ): decimal
+    column( event_time ): timestamp
+    column( event_type ): varchar
+
+    <color:#b8861b><&key></color> PRIMARY(id)
+    <color:#aaaaaa><&key></color> FOREIGN(model_id)
+    <color:#aaaaaa><&key></color> FOREIGN(participant_id)
+}
+
+group --> user
+
+typing_text --> project
+user --> project
+project --> model
+project --> participant
+
+model --> winfits_setting
+model --> drag_and_drop
+model --> typing
+
+participant --> winfits_round
+participant --> drag_and_drop
+participant --> typing
+
+winfits_setting --> winfits_round
+winfits_round --> winfits_result
+@enduml
