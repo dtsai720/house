@@ -2,7 +2,7 @@
 
 ```sh
 $ docker run --name postgres -itd --restart always \
--p 5432:5432 -v ${PWD}/pg-data:/var/lib/postgresql/data \
+-p 5432:5432 \
 -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres \
 -e POSTGRES_PORT=5432 -e POSTGRES_DB=hourse \
 postgres:15.0-alpine
@@ -31,4 +31,10 @@ npx playwright test
 We suggest that you begin by typing:
 
     npx playwright test
+```
+
+```
+$ docker run --name nginx -itd --restart always -p 80:80 \
+-v ${PWD}/conf/default.conf:/etc/nginx/conf.d/default.conf \
+-v ${PWD}/static:/usr/share/nginx/html nginx
 ```

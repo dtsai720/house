@@ -44,17 +44,6 @@ func FirefoxEvent(ctx context.Context, pw *playwright.Playwright) {
 	for i := 0; i < len(candidates); i++ {
 		service.FetchAll(ctx, candidates[i])
 	}
-
-	// cities := []string{"台北市", "新北市", "桃園市", "高雄市", "新竹縣", "新竹市", "台南市", "屏東縣"}
-	// for _, city := range cities {
-	// 	item := parser.NewParseYungChing(city)
-	// 	service.FetchAll(ctx, item)
-	// }
-
-	// for _, city := range []string{"Hsinchu-city", "Hsinchu-county", "Taoyuan-city", "Kaohsiung-city"} {
-	// 	item := parser.NewParseSinYi(city)
-	// 	service.FetchAll(ctx, item)
-	// }
 }
 
 func ChromiumEvent(ctx context.Context, pw *playwright.Playwright) {
