@@ -42,7 +42,7 @@ func NewService(bt pw.BrowserType) Service {
 	output.client = new(http.Client)
 	output.count = 0
 	output.browser.browserType = bt
-	output.resetCount = 100
+	output.resetCount = 35
 
 	if output.browser.browser, err = bt.Launch(); err != nil {
 		log.Fatalln(err)

@@ -56,7 +56,7 @@ func (hs HourseService) ListShape(ctx context.Context) ([]string, error) {
 	}
 
 	result := make(sort.StringSlice, 0, len(uniform))
-	for name, _ := range uniform {
+	for name := range uniform {
 		if name == "不限" {
 			continue
 		}
