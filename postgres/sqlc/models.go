@@ -19,7 +19,7 @@ type City struct {
 	DeletedAt sql.NullTime
 }
 
-type Hourse struct {
+type house struct {
 	ID          int32
 	UniversalID uuid.UUID
 	SectionID   int32

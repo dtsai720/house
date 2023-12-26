@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hourse"
+	"github.com/house"
 	pw "github.com/playwright-community/playwright-go"
 )
 
@@ -78,7 +78,7 @@ func (hs *Service) Reset() error {
 	return nil
 }
 
-func (hs Service) FetchOne(ctx context.Context, bp hourse.ParserService) ([]hourse.UpsertHourseRequest, error) {
+func (hs Service) FetchOne(ctx context.Context, bp house.ParserService) ([]house.UpserthouseRequest, error) {
 	var err error
 	var items []pw.ElementHandle
 	qs := bp.ItemQuerySelector()
@@ -95,9 +95,9 @@ func (hs Service) FetchOne(ctx context.Context, bp hourse.ParserService) ([]hour
 		return nil, err
 	}
 
-	var output []hourse.UpsertHourseRequest
+	var output []house.UpserthouseRequest
 	for _, item := range items {
-		var result hourse.UpsertHourseRequest
+		var result house.UpserthouseRequest
 		var err error
 
 		if result, err = bp.FetchItem(item); err != nil {
@@ -127,13 +127,13 @@ func (hs Service) FetchOne(ctx context.Context, bp hourse.ParserService) ([]hour
 	return output, nil
 }
 
-func (hs Service) Upsert(ctx context.Context, in hourse.UpsertHourseRequest) error {
+func (hs Service) Upsert(ctx context.Context, in house.UpserthouseRequest) error {
 	body, err := json.Marshal(in)
 	if err != nil {
 		return err
 	}
 
-	const URL = "http://localhost:8000/hourse"
+	const URL = "http://localhost:8000/house"
 
 	r, err := http.NewRequest(http.MethodPut, URL, bytes.NewReader(body))
 	if err != nil {
@@ -149,7 +149,7 @@ func (hs Service) Upsert(ctx context.Context, in hourse.UpsertHourseRequest) err
 	return nil
 }
 
-func (hs *Service) FetchAll(ctx context.Context, bp hourse.ParserService) error {
+func (hs *Service) FetchAll(ctx context.Context, bp house.ParserService) error {
 	if !bp.HasNext() {
 		return nil
 	}

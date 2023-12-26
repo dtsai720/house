@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hourse"
+	"github.com/house"
 	pw "github.com/playwright-community/playwright-go"
 )
 
@@ -30,7 +30,7 @@ type ParseSinYi struct {
 	}
 }
 
-func NewParseSinYi(city string) hourse.ParserService {
+func NewParseSinYi(city string) house.ParserService {
 	sy := new(ParseSinYi)
 	sy.PageSize = 20
 	sy.CurrentPage = 1
@@ -101,8 +101,8 @@ func (sy ParseSinYi) Link(item pw.ElementHandle) (string, error) {
 	}
 }
 
-func (sy *ParseSinYi) FetchItem(item pw.ElementHandle) (hourse.UpsertHourseRequest, error) {
-	var result hourse.UpsertHourseRequest
+func (sy *ParseSinYi) FetchItem(item pw.ElementHandle) (house.UpserthouseRequest, error) {
+	var result house.UpserthouseRequest
 	var err error
 	var elements []pw.ElementHandle
 	if item == nil {

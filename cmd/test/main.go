@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/hourse"
+	"github.com/house"
 )
 
 const (
@@ -140,7 +140,7 @@ func (h *HbHousing) FetchCity(address string) string {
 	return ""
 }
 
-func (h *HbHousing) ToUpsertRequest(ctx context.Context, item Item) (*hourse.UpsertHourseRequest, error) {
+func (h *HbHousing) ToUpsertRequest(ctx context.Context, item Item) (*house.UpserthouseRequest, error) {
 	link := fmt.Sprintf("%s/detail/?sn=%s", h.BaseURL, item.Link)
 	r, err := http.NewRequestWithContext(ctx, http.MethodGet, link, nil)
 	if err != nil {
@@ -164,7 +164,7 @@ func (h *HbHousing) ToUpsertRequest(ctx context.Context, item Item) (*hourse.Ups
 		return nil, err
 	}
 
-	body := new(hourse.UpsertHourseRequest)
+	body := new(house.UpserthouseRequest)
 
 	body.Price, err = strconv.Atoi(item.Price)
 	if err != nil {
@@ -200,13 +200,13 @@ func (h *HbHousing) ToUpsertRequest(ctx context.Context, item Item) (*hourse.Ups
 	return body, nil
 }
 
-func (h *HbHousing) Upsert(ctx context.Context, in *hourse.UpsertHourseRequest) error {
+func (h *HbHousing) Upsert(ctx context.Context, in *house.UpserthouseRequest) error {
 	body, err := json.Marshal(in)
 	if err != nil {
 		return err
 	}
 
-	const URL = "http://localhost:8000/hourse"
+	const URL = "http://localhost:8000/house"
 
 	r, err := http.NewRequestWithContext(ctx, http.MethodPut, URL, bytes.NewReader(body))
 	if err != nil {

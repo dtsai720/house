@@ -1,4 +1,4 @@
-module github.com/hourse
+module github.com/house
 
 go 1.19
 

@@ -1,4 +1,4 @@
-package hourse
+package house
 
 import (
 	"context"
@@ -9,16 +9,16 @@ import (
 	validator "github.com/go-playground/validator/v10"
 )
 
-type HourseService struct {
+type houseService struct {
 	db        Postgres
 	validator *validator.Validate
 }
 
 func NewService(db Postgres) Service {
-	return HourseService{db: db, validator: validator.New()}
+	return houseService{db: db, validator: validator.New()}
 }
 
-func (hs HourseService) Upsert(ctx context.Context, in UpsertHourseRequest) error {
+func (hs houseService) Upsert(ctx context.Context, in UpserthouseRequest) error {
 	if err := hs.validator.Struct(in); err != nil {
 		log.Println(err)
 		return err
@@ -27,22 +27,22 @@ func (hs HourseService) Upsert(ctx context.Context, in UpsertHourseRequest) erro
 	return hs.db.Upsert(ctx, in)
 }
 
-func (hs HourseService) Get(ctx context.Context, in GetHoursesRequest) (int64, []GetHoursesResponse, error) {
+func (hs houseService) Get(ctx context.Context, in GethousesRequest) (int64, []GethousesResponse, error) {
 	for i := 0; i < len(in.Shape); i++ {
 		in.Shape[i] = strings.Join([]string{"%", in.Shape[i], "%"}, "")
 	}
 	return hs.db.Get(ctx, in)
 }
 
-func (hs HourseService) ListCities(ctx context.Context) ([]string, error) {
+func (hs houseService) ListCities(ctx context.Context) ([]string, error) {
 	return hs.db.ListCities(ctx)
 }
 
-func (hs HourseService) ListSectionByCity(ctx context.Context, name string) ([]string, error) {
+func (hs houseService) ListSectionByCity(ctx context.Context, name string) ([]string, error) {
 	return hs.db.ListSectionByCity(ctx, name)
 }
 
-func (hs HourseService) ListShape(ctx context.Context) ([]string, error) {
+func (hs houseService) ListShape(ctx context.Context) ([]string, error) {
 	shapes, err := hs.db.ListShape(ctx)
 	if err != nil {
 		return nil, err

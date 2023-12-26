@@ -12,10 +12,10 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/hourse"
-	hrhttp "github.com/hourse/http"
-	"github.com/hourse/parser"
-	"github.com/hourse/postgres"
+	"github.com/house"
+	hrhttp "github.com/house/http"
+	"github.com/house/parser"
+	"github.com/house/postgres"
 	_ "github.com/lib/pq"
 	playwright "github.com/playwright-community/playwright-go"
 )
@@ -24,7 +24,7 @@ func FirefoxEvent(ctx context.Context, pw *playwright.Playwright) {
 	service := parser.NewService(pw.Firefox)
 	defer service.Close()
 
-	candidates := []hourse.ParserService{
+	candidates := []house.ParserService{
 		parser.NewParseSinYi("Taipei"),
 		parser.NewParseYungChing("台北市"),
 		parser.NewParseSinYi("NewTaipei"),
@@ -74,8 +74,12 @@ func main() {
 	go ChromiumEvent(ctx, pw)
 
 	conn, err := sql.Open("postgres", fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		"localhost", 5432, "postgres", "postgres", "hourse"))
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("POSTGRES_HOST"),
+		os.Getenv("POSTGRES_PORT"),
+		os.Getenv("POSTGRES_USER"),
+		os.Getenv("POSTGRES_PASSWORD"),
+		os.Getenv("POSTGRES_DB")))
 
 	if err != nil {
 		log.Fatalln(err)
@@ -88,7 +92,7 @@ func main() {
 
 	srv := new(http.Server)
 	srv.Addr = ":8000"
-	srv.Handler = hrhttp.NewServer(chi.NewMux(), hourse.NewService(db))
+	srv.Handler = hrhttp.NewServer(chi.NewMux(), house.NewService(db))
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

@@ -9,17 +9,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hourse"
-	"github.com/hourse/postgres/sqlc"
+	"github.com/house"
+	"github.com/house/postgres/sqlc"
 )
 
 type Queries interface {
-	UpsertHourse(ctx context.Context, arg sqlc.UpsertHourseParams) error
+	Upserthouse(ctx context.Context, arg sqlc.UpserthouseParams) error
 	InsertSection(ctx context.Context, arg sqlc.InsertSectionParams) (sqlc.Section, error)
 	InsertCity(ctx context.Context, name string) (sqlc.City, error)
 	InsertShape(ctx context.Context, name string) (sqlc.Shape, error)
 
-	GetHourses(ctx context.Context, arg sqlc.GetHoursesParams) ([]sqlc.GetHoursesRow, error)
+	Gethouses(ctx context.Context, arg sqlc.GethousesParams) ([]sqlc.GethousesRow, error)
 	GetShape(ctx context.Context, name string) (sqlc.Shape, error)
 	GetSection(ctx context.Context, name string) (sqlc.Section, error)
 	GetCity(ctx context.Context, name string) (sqlc.City, error)
@@ -29,36 +29,36 @@ type Queries interface {
 	ListShape(ctx context.Context) ([]string, error)
 }
 
-type HourseRepository struct {
+type houseRepository struct {
 	db      *sql.DB
 	queries Queries
 }
 
-func NewPostgres(db *sql.DB) hourse.Postgres {
-	return HourseRepository{
+func NewPostgres(db *sql.DB) house.Postgres {
+	return houseRepository{
 		db:      db,
 		queries: sqlc.New(db),
 	}
 }
 
-func (hr HourseRepository) NewQueries(db sqlc.DBTX) Queries {
+func (hr houseRepository) NewQueries(db sqlc.DBTX) Queries {
 	return sqlc.New(db)
 }
 
-func (hr HourseRepository) ListCities(ctx context.Context) ([]string, error) {
+func (hr houseRepository) ListCities(ctx context.Context) ([]string, error) {
 	return hr.queries.ListCities(ctx)
 }
 
-func (hr HourseRepository) ListSectionByCity(ctx context.Context, name string) ([]string, error) {
+func (hr houseRepository) ListSectionByCity(ctx context.Context, name string) ([]string, error) {
 	return hr.queries.ListSectionByCity(ctx, name)
 }
 
-func (hr HourseRepository) ListShape(ctx context.Context) ([]string, error) {
+func (hr houseRepository) ListShape(ctx context.Context) ([]string, error) {
 	return hr.queries.ListShape(ctx)
 }
 
-func (hr HourseRepository) Get(ctx context.Context, in hourse.GetHoursesRequest) (int64, []hourse.GetHoursesResponse, error) {
-	response, err := hr.queries.GetHourses(ctx, sqlc.GetHoursesParams{
+func (hr houseRepository) Get(ctx context.Context, in house.GethousesRequest) (int64, []house.GethousesResponse, error) {
+	response, err := hr.queries.Gethouses(ctx, sqlc.GethousesParams{
 		City:        strings.Join(in.City, ","),
 		Shape:       strings.Join(in.Shape, ","),
 		Section:     strings.Join(in.Section, ","),
@@ -73,9 +73,9 @@ func (hr HourseRepository) Get(ctx context.Context, in hourse.GetHoursesRequest)
 	}
 
 	var count int64
-	output := make([]hourse.GetHoursesResponse, 0, len(response))
+	output := make([]house.GethousesResponse, 0, len(response))
 	for _, body := range response {
-		result := hourse.GetHoursesResponse{
+		result := house.GethousesResponse{
 			UniversalID: body.UniversalID,
 			Link:        body.Link,
 			Price:       body.Price,
@@ -132,7 +132,7 @@ func GetShape(ctx context.Context, q Queries, name string) (sqlc.Shape, error) {
 	return q.InsertShape(ctx, name)
 }
 
-func (hr HourseRepository) Upsert(ctx context.Context, in hourse.UpsertHourseRequest) error {
+func (hr houseRepository) Upsert(ctx context.Context, in house.UpserthouseRequest) error {
 	tx, err := hr.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -152,7 +152,7 @@ func (hr HourseRepository) Upsert(ctx context.Context, in hourse.UpsertHourseReq
 	} else if raw, err := json.Marshal(in); err != nil {
 		log.Printf("marshal data error: %v", err)
 		return err
-	} else if err = q.UpsertHourse(ctx, sqlc.UpsertHourseParams{
+	} else if err = q.Upserthouse(ctx, sqlc.UpserthouseParams{
 		SectionID: section.ID,
 		Link:      in.Link,
 		Layout:    sql.NullString{String: in.Layout, Valid: in.Layout != ""},
@@ -166,7 +166,7 @@ func (hr HourseRepository) Upsert(ctx context.Context, in hourse.UpsertHourseReq
 		Raw:       json.RawMessage(raw),
 		Others:    in.Others,
 	}); err != nil {
-		log.Printf("upsert hourse error: %v, data is %s\n", err, raw)
+		log.Printf("upsert house error: %v, data is %s\n", err, raw)
 		return err
 	}
 	return tx.Commit()

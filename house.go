@@ -1,4 +1,4 @@
-package hourse
+package house
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	pw "github.com/playwright-community/playwright-go"
 )
 
-type UpsertHourseRequest struct {
+type UpserthouseRequest struct {
 	City     string   `json:"city" validate:"required"`
 	Section  string   `json:"section" validate:"required"`
 	Price    int      `json:"price" validate:"required"`
@@ -24,7 +24,7 @@ type UpsertHourseRequest struct {
 	Others   []string `json:"others,omitempty"`
 }
 
-type GetHoursesRequest struct {
+type GethousesRequest struct {
 	City        []string `json:"city,omitempty"`
 	Shape       []string `json:"shape,omitempty"`
 	Section     []string `json:"section,omitempty"`
@@ -35,7 +35,7 @@ type GetHoursesRequest struct {
 	MinMainArea string   `json:"min_main_area,omitempty"`
 }
 
-type GetHoursesResponse struct {
+type GethousesResponse struct {
 	UniversalID uuid.UUID `json:"universal_id"`
 	Link        string    `json:"link"`
 	Layout      string    `json:"layout,omitempty"`
@@ -55,20 +55,20 @@ type ParserService interface {
 	UpdateCurrentPage()
 	ItemQuerySelector() string
 	SetTotalRow(context.Context, pw.Page) error
-	FetchItem(item pw.ElementHandle) (UpsertHourseRequest, error)
+	FetchItem(item pw.ElementHandle) (UpserthouseRequest, error)
 }
 
 type Postgres interface {
-	Upsert(ctx context.Context, in UpsertHourseRequest) error
-	Get(ctx context.Context, in GetHoursesRequest) (int64, []GetHoursesResponse, error)
+	Upsert(ctx context.Context, in UpserthouseRequest) error
+	Get(ctx context.Context, in GethousesRequest) (int64, []GethousesResponse, error)
 	ListCities(ctx context.Context) ([]string, error)
 	ListSectionByCity(ctx context.Context, name string) ([]string, error)
 	ListShape(ctx context.Context) ([]string, error)
 }
 
 type Service interface {
-	Upsert(ctx context.Context, in UpsertHourseRequest) error
-	Get(ctx context.Context, in GetHoursesRequest) (int64, []GetHoursesResponse, error)
+	Upsert(ctx context.Context, in UpserthouseRequest) error
+	Get(ctx context.Context, in GethousesRequest) (int64, []GethousesResponse, error)
 	ListCities(ctx context.Context) ([]string, error)
 	ListSectionByCity(ctx context.Context, name string) ([]string, error)
 	ListShape(ctx context.Context) ([]string, error)

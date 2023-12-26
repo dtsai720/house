@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hourse"
+	"github.com/house"
 	pw "github.com/playwright-community/playwright-go"
 )
 
@@ -29,7 +29,7 @@ type ParseYungChing struct {
 	}
 }
 
-func NewParseYungChing(city string) hourse.ParserService {
+func NewParseYungChing(city string) house.ParserService {
 	yc := new(ParseYungChing)
 	yc.PageSize = 30
 	yc.CurrentPage = 1
@@ -115,7 +115,7 @@ func (yc ParseYungChing) Price(handle pw.ElementHandle) (int, error) {
 	return Price(handle, yc.Selectors.Price.Build())
 }
 
-func (yc ParseYungChing) Address(item pw.ElementHandle, in *hourse.UpsertHourseRequest) error {
+func (yc ParseYungChing) Address(item pw.ElementHandle, in *house.UpserthouseRequest) error {
 	var err error
 	var element pw.ElementHandle
 
@@ -134,8 +134,8 @@ func (yc ParseYungChing) Address(item pw.ElementHandle, in *hourse.UpsertHourseR
 	return nil
 }
 
-func (yc ParseYungChing) FetchItem(item pw.ElementHandle) (hourse.UpsertHourseRequest, error) {
-	var result hourse.UpsertHourseRequest
+func (yc ParseYungChing) FetchItem(item pw.ElementHandle) (house.UpserthouseRequest, error) {
+	var result house.UpserthouseRequest
 	if item == nil {
 		return result, nil
 	}

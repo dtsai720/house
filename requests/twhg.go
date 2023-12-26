@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hourse"
+	"github.com/house"
 )
 
 type Twhg struct {
@@ -40,7 +40,7 @@ func (t *Twhg) Request() (*http.Request, error) {
 	return r, nil
 }
 
-func (t *Twhg) ToCanical(in []byte) ([]hourse.UpsertHourseRequest, error) {
+func (t *Twhg) ToCanical(in []byte) ([]house.UpserthouseRequest, error) {
 	type Body struct {
 		NowPag string `json:"nowPag"`
 		ToPag  int    `json:"toPag"`
@@ -62,7 +62,7 @@ func (t *Twhg) ToCanical(in []byte) ([]hourse.UpsertHourseRequest, error) {
 		t.TotalPage = body.ToPag
 	}
 
-	output := make([]hourse.UpsertHourseRequest, 0, len(body.Obj))
+	output := make([]house.UpserthouseRequest, 0, len(body.Obj))
 	for _, object := range body.Obj {
 		var price int
 		price, err = strconv.Atoi(object.Price)
@@ -70,7 +70,7 @@ func (t *Twhg) ToCanical(in []byte) ([]hourse.UpsertHourseRequest, error) {
 			continue
 		}
 
-		output = append(output, hourse.UpsertHourseRequest{
+		output = append(output, house.UpserthouseRequest{
 			City:     t.City,
 			Section:  object.Section,
 			Price:    price,

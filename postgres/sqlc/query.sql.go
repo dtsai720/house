@@ -31,61 +31,61 @@ func (q *Queries) GetCity(ctx context.Context, name string) (City, error) {
 	return i, err
 }
 
-const getHourses = `-- name: GetHourses :many
+const gethouses = `-- name: Gethouses :many
 WITH duplicate_conditions AS (
     SELECT MIN(id) AS id, section_id, address, age, area
-    FROM hourse
+    FROM house
     WHERE link LIKE 'https://sale.591.com.tw/home%'
     AND updated_at > CURRENT_TIMESTAMP - INTERVAL '7 day'
     GROUP BY section_id, address, age, area
     HAVING count(1) > 1
 ),
 duplicate AS (
-    SELECT hourse.id
-    FROM hourse
+    SELECT house.id
+    FROM house
     INNER JOIN duplicate_conditions ON(
-            hourse.section_id = duplicate_conditions.section_id
-        AND hourse.address = duplicate_conditions.address
-        AND hourse.age = duplicate_conditions.age
-        AND hourse.area = duplicate_conditions.area
-        AND hourse.link LIKE 'https://sale.591.com.tw/home%'
+            house.section_id = duplicate_conditions.section_id
+        AND house.address = duplicate_conditions.address
+        AND house.age = duplicate_conditions.age
+        AND house.area = duplicate_conditions.area
+        AND house.link LIKE 'https://sale.591.com.tw/home%'
     )
-    WHERE hourse.id NOT IN (SELECT id FROM duplicate_conditions)
-    AND hourse.updated_at > CURRENT_TIMESTAMP - INTERVAL '7 day'
+    WHERE house.id NOT IN (SELECT id FROM duplicate_conditions)
+    AND house.updated_at > CURRENT_TIMESTAMP - INTERVAL '7 day'
 ),
 candidates AS (
-SELECT hourse.id
-FROM hourse
-INNER JOIN section ON(hourse.section_id = section.id)
+SELECT house.id
+FROM house
+INNER JOIN section ON(house.section_id = section.id)
 INNER JOIN city ON(section.city_id = city.id)
-INNER JOIN shape ON(hourse.shape_id = shape.id)
-WHERE hourse.updated_at > CURRENT_TIMESTAMP - INTERVAL '7 day'
-    AND hourse.id NOT IN (SELECT id FROM duplicate)
+INNER JOIN shape ON(house.shape_id = shape.id)
+WHERE house.updated_at > CURRENT_TIMESTAMP - INTERVAL '7 day'
+    AND house.id NOT IN (SELECT id FROM duplicate)
     AND (COALESCE($1, '') = '' OR city.name = ANY(string_to_array($1, ',')))
     AND (COALESCE($2, '') = '' OR section.name = ANY(string_to_array($2, ',')))
     AND (COALESCE($3, '') = '' OR shape.name LIKE ANY(string_to_array($3, ',')))
-    AND (COALESCE($4, '') = '' OR hourse.price <= $4 :: DECIMAL)
-    AND (COALESCE($5, '') = '' OR hourse.price > $5 :: DECIMAL)
-    AND (COALESCE($6, '') = '' OR hourse.age < $6)
-    AND (COALESCE($7, '') = '' OR hourse.main_area <= $7 :: DECIMAL)
-    AND (COALESCE($8, '') = '' OR hourse.main_area > $8 :: DECIMAL)
+    AND (COALESCE($4, '') = '' OR house.price <= $4 :: DECIMAL)
+    AND (COALESCE($5, '') = '' OR house.price > $5 :: DECIMAL)
+    AND (COALESCE($6, '') = '' OR house.age < $6)
+    AND (COALESCE($7, '') = '' OR house.main_area <= $7 :: DECIMAL)
+    AND (COALESCE($8, '') = '' OR house.main_area > $8 :: DECIMAL)
 )
 SELECT
-    hourse.id, hourse.universal_id, hourse.section_id, hourse.shape_id, hourse.link, hourse.layout, hourse.address, hourse.price, hourse.floor, hourse.age, hourse.area, hourse.main_area, hourse.raw, hourse.others, hourse.created_at, hourse.updated_at, hourse.deleted_at,
-    CONCAT(city.name, section.name, hourse.address) :: VARCHAR AS location,
+    house.id, house.universal_id, house.section_id, house.shape_id, house.link, house.layout, house.address, house.price, house.floor, house.age, house.area, house.main_area, house.raw, house.others, house.created_at, house.updated_at, house.deleted_at,
+    CONCAT(city.name, section.name, house.address) :: VARCHAR AS location,
     city.name :: TEXT AS city,
     section.name :: TEXT AS section,
     shape.name :: TEXT AS shape,
     (SELECT COUNT(1) FROM candidates) AS total_count
-FROM hourse
+FROM house
 INNER JOIN candidates USING(id)
-INNER JOIN section ON (section.id = hourse.section_id)
-INNER JOIN shape ON(shape.id = hourse.shape_id)
+INNER JOIN section ON (section.id = house.section_id)
+INNER JOIN shape ON(shape.id = house.shape_id)
 INNER JOIN city ON (city.id = section.city_id)
-ORDER BY hourse.section_id, hourse.age, hourse.main_area, hourse.price
+ORDER BY house.section_id, house.age, house.main_area, house.price
 `
 
-type GetHoursesParams struct {
+type GethousesParams struct {
 	City        interface{}
 	Section     interface{}
 	Shape       interface{}
@@ -96,7 +96,7 @@ type GetHoursesParams struct {
 	MinMainArea interface{}
 }
 
-type GetHoursesRow struct {
+type GethousesRow struct {
 	ID          int32
 	UniversalID uuid.UUID
 	SectionID   int32
@@ -121,8 +121,8 @@ type GetHoursesRow struct {
 	TotalCount  int64
 }
 
-func (q *Queries) GetHourses(ctx context.Context, arg GetHoursesParams) ([]GetHoursesRow, error) {
-	rows, err := q.db.QueryContext(ctx, getHourses,
+func (q *Queries) Gethouses(ctx context.Context, arg GethousesParams) ([]GethousesRow, error) {
+	rows, err := q.db.QueryContext(ctx, gethouses,
 		arg.City,
 		arg.Section,
 		arg.Shape,
@@ -136,9 +136,9 @@ func (q *Queries) GetHourses(ctx context.Context, arg GetHoursesParams) ([]GetHo
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetHoursesRow
+	var items []GethousesRow
 	for rows.Next() {
-		var i GetHoursesRow
+		var i GethousesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UniversalID,
@@ -344,13 +344,13 @@ func (q *Queries) ListShape(ctx context.Context) ([]string, error) {
 	return items, nil
 }
 
-const upsertHourse = `-- name: UpsertHourse :exec
-INSERT INTO hourse (section_id, link, layout, address, price, floor, shape_id, age, area, main_area, raw, others ,created_at, updated_at)
+const upserthouse = `-- name: Upserthouse :exec
+INSERT INTO house (section_id, link, layout, address, price, floor, shape_id, age, area, main_area, raw, others ,created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 ,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (link) DO UPDATE SET price = $5, raw = $11, age = $8, updated_at = CURRENT_TIMESTAMP
 `
 
-type UpsertHourseParams struct {
+type UpserthouseParams struct {
 	SectionID int32
 	Link      string
 	Layout    sql.NullString
@@ -365,8 +365,8 @@ type UpsertHourseParams struct {
 	Others    []string
 }
 
-func (q *Queries) UpsertHourse(ctx context.Context, arg UpsertHourseParams) error {
-	_, err := q.db.ExecContext(ctx, upsertHourse,
+func (q *Queries) Upserthouse(ctx context.Context, arg UpserthouseParams) error {
+	_, err := q.db.ExecContext(ctx, upserthouse,
 		arg.SectionID,
 		arg.Link,
 		arg.Layout,

@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hourse"
+	"github.com/house"
 )
 
 func (s *Server) HandleUpsert() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var body hourse.UpsertHourseRequest
+		var body house.UpserthouseRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			log.Printf("error when decode: %v\n", err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -30,7 +30,7 @@ func (s *Server) HandleUpsert() http.HandlerFunc {
 
 func (s *Server) HandleGetMulti() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var request hourse.GetHoursesRequest
+		var request house.GethousesRequest
 		param := r.URL.Query()
 		request.Age = param.Get("age")
 		request.MaxMainArea = param.Get("max_main_area")

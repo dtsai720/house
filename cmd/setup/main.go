@@ -12,9 +12,9 @@ type Request struct {
 }
 
 func main() {
-	// if err := playwright.Install(); err != nil {
-	// 	log.Fatalln(err)
-	// }
+	if err := playwright.Install(); err != nil {
+		log.Fatalln(err)
+	}
 
 	pw, err := playwright.Run()
 	if err != nil {

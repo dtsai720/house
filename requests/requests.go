@@ -9,12 +9,12 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/hourse"
+	"github.com/house"
 )
 
 type AJAXParser interface {
 	Request() (*http.Request, error)
-	ToCanical(body []byte) ([]hourse.UpsertHourseRequest, error)
+	ToCanical(body []byte) ([]house.UpserthouseRequest, error)
 	UpdateCurrentPage()
 	HasNext() bool
 }
@@ -46,17 +46,20 @@ func ProcessParseByAJAX(ctx context.Context, ajax AJAXParser, client *http.Clien
 		return err
 	}
 
-	return Upsert(ctx, in, client)
+	for _, row := range in {
+		Upsert(ctx, &row, client)
+	}
+	return nil
 
 }
 
-func Upsert(ctx context.Context, in *hourse.UpsertHourseRequest, client *http.Client) error {
+func Upsert(ctx context.Context, in *house.UpserthouseRequest, client *http.Client) error {
 	body, err := json.Marshal(in)
 	if err != nil {
 		return err
 	}
 
-	const URL = "http://localhost:8000/hourse"
+	const URL = "http://localhost:8000/house"
 
 	r, err := http.NewRequest(http.MethodPut, URL, bytes.NewReader(body))
 	if err != nil {

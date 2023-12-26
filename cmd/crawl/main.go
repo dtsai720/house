@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/hourse/parser"
+	"github.com/house/parser"
 	_ "github.com/lib/pq"
 	playwright "github.com/playwright-community/playwright-go"
 )

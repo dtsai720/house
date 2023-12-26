@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hourse"
+	"github.com/house"
 	pw "github.com/playwright-community/playwright-go"
 )
 
@@ -33,7 +33,7 @@ type ParseSale struct {
 	}
 }
 
-func NewParseSale(regionID int) hourse.ParserService {
+func NewParseSale(regionID int) house.ParserService {
 	var err error
 	var host *url.URL
 
@@ -61,7 +61,7 @@ func NewParseSale(regionID int) hourse.ParserService {
 	return output
 }
 
-func (ps ParseSale) SetField(field *hourse.UpsertHourseRequest, attr string, text string) {
+func (ps ParseSale) SetField(field *house.UpserthouseRequest, attr string, text string) {
 	switch attr {
 	case "houseList-item-attrs-shape":
 		field.Shape = text
@@ -149,8 +149,8 @@ func (ps ParseSale) URL() string {
 	return host.String()
 }
 
-func (ps ParseSale) FetchItem(item pw.ElementHandle) (hourse.UpsertHourseRequest, error) {
-	var result hourse.UpsertHourseRequest
+func (ps ParseSale) FetchItem(item pw.ElementHandle) (house.UpserthouseRequest, error) {
+	var result house.UpserthouseRequest
 	if item == nil {
 		return result, nil
 	}

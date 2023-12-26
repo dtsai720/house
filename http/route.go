@@ -10,8 +10,8 @@ import (
 )
 
 func (s *Server) routes() {
-	s.router.Get("/hourse", s.HandleGetMulti())
-	s.router.Put("/hourse", s.HandleUpsert())
+	s.router.Get("/house", s.HandleGetMulti())
+	s.router.Put("/house", s.HandleUpsert())
 	s.router.Get("/city", s.HandleListCities())
 	s.router.Get("/section", s.HandleListSection())
 	s.router.Get("/shape", s.HandleListShape())
